@@ -1,13 +1,15 @@
-import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useState, Suspense } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Search, Filter, Building2, MapPin, DollarSign } from 'lucide-react'
+import { Search, Filter, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { formatInvestmentRange, getCategoryLabel } from '@/lib/utils'
+import FranchiseCard from '@/components/directory/FranchiseCard'
+import RequestInfoModal from '@/components/directory/RequestInfoModal'
+import FloatingCompareButton from '@/components/directory/FloatingCompareButton'
 
 const CATEGORIES = [
   { value: 'all', label: 'All Categories' },
@@ -36,6 +38,8 @@ const INVESTMENT_RANGES = [
   { value: 'over_500k', label: 'Over $500K', min: 500000, max: 10000000 },
 ]
 
+const pageSize = 12
+
 async function getFranchises(params: {
   category?: string
   investment?: string
@@ -43,11 +47,9 @@ async function getFranchises(params: {
   page?: number
 }) {
   const supabase = createClient()
-  const pageSize = 12
   const page = params.page || 1
   const offset = (page - 1) * pageSize
 
-  // Query the franchise table - primary key is 'name'
   let query = supabase
     .from('franchise')
     .select('*', { count: 'exact' })
@@ -55,12 +57,10 @@ async function getFranchises(params: {
     .order('name')
     .range(offset, offset + pageSize - 1)
 
-  // Apply category filter if provided
   if (params.category && params.category !== 'all') {
     query = query.eq('category', params.category)
   }
 
-  // Apply investment filter if provided
   if (params.investment && params.investment !== 'all') {
     const range = INVESTMENT_RANGES.find(r => r.value === params.investment)
     if (range && range.min !== undefined) {
@@ -69,7 +69,6 @@ async function getFranchises(params: {
     }
   }
 
-  // Apply search filter if provided
   if (params.search) {
     query = query.ilike('name', `%${params.search}%`)
   }
@@ -88,90 +87,65 @@ async function getFranchises(params: {
   }
 }
 
-function FranchiseCard({ franchise }: { franchise: any }) {
-  // Use slug if available, otherwise encode the name (since name is the primary key)
-  const linkSlug = franchise.slug || encodeURIComponent(franchise.name)
-  
-  // Parse total_locations as it's stored as text
-  const totalLocations = franchise.total_locations ? parseInt(franchise.total_locations, 10) : null
-
-  return (
-    <Link href={`/directory/${linkSlug}`}>
-      <Card className="h-full hover:shadow-lg transition-shadow group">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            <div className="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-              {franchise.logo_url ? (
-                <Image
-                  src={franchise.logo_url}
-                  alt={franchise.name}
-                  width={64}
-                  height={64}
-                  className="object-contain"
-                  unoptimized
-                />
-              ) : (
-                <Building2 className="h-8 w-8 text-gray-400" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="font-semibold text-brand-navy group-hover:text-brand-gold transition-colors truncate">
-                  {franchise.name}
-                </h3>
-                {franchise.is_featured && (
-                  <Badge className="bg-brand-gold text-brand-navy flex-shrink-0">
-                    Featured
-                  </Badge>
-                )}
-              </div>
-              {franchise.category && (
-                <Badge variant="outline" className="mt-1">
-                  {getCategoryLabel(franchise.category)}
-                </Badge>
-              )}
-            </div>
-          </div>
-
-          {franchise.description && (
-            <p className="mt-4 text-sm text-gray-600 line-clamp-2">
-              {franchise.description}
-            </p>
-          )}
-
-          <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
-            <div className="flex items-center text-sm text-gray-600">
-              <DollarSign className="h-4 w-4 mr-2 text-gray-400" />
-              <span className="font-medium text-brand-navy">
-                {formatInvestmentRange(franchise.initial_investment_min, franchise.initial_investment_max)}
-              </span>
-            </div>
-            {totalLocations && totalLocations > 0 && (
-              <div className="flex items-center text-sm text-gray-600">
-                <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                {totalLocations.toLocaleString()} locations
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
-  )
-}
-
-async function DirectoryContent({
+function DirectoryContent({
   searchParams,
 }: {
   searchParams: { category?: string; investment?: string; search?: string; page?: string }
 }) {
-  const { franchises, total, totalPages } = await getFranchises({
-    category: searchParams.category,
-    investment: searchParams.investment,
-    search: searchParams.search,
+  const [compareList, setCompareList] = useState<any[]>([])
+  const [requestModalOpen, setRequestModalOpen] = useState(false)
+  const [selectedFranchise, setSelectedFranchise] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [franchises, setFranchises] = useState<any[]>([])
+  const [total, setTotal] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const [filters, setFilters] = useState({
+    category: searchParams.category || 'all',
+    investment: searchParams.investment || 'all',
+    search: searchParams.search || '',
     page: searchParams.page ? parseInt(searchParams.page) : 1,
   })
 
-  const currentPage = searchParams.page ? parseInt(searchParams.page) : 1
+  const fetchFranchises = async () => {
+    setIsLoading(true)
+    const result = await getFranchises(filters)
+    setFranchises(result.franchises)
+    setTotal(result.total)
+    setTotalPages(result.totalPages)
+    setIsLoading(false)
+  }
+
+  useState(() => {
+    fetchFranchises()
+  })
+
+  const handleAddToCompare = (franchise: any) => {
+    setCompareList(prev => {
+      const isAlreadyAdded = prev.some(f => f.name === franchise.name)
+      if (isAlreadyAdded) {
+        return prev.filter(f => f.name !== franchise.name)
+      }
+      if (prev.length >= 3) {
+        return prev
+      }
+      return [...prev, franchise]
+    })
+  }
+
+  const handleRemoveFromCompare = (franchise: any) => {
+    setCompareList(prev => prev.filter(f => f.name !== franchise.name))
+  }
+
+  const handleOpenRequestModal = (franchise: any) => {
+    setSelectedFranchise(franchise)
+    setRequestModalOpen(true)
+  }
+
+  const isInCompare = (franchiseName: string) => {
+    return compareList.some(f => f.name === franchiseName)
+  }
+
+  const currentPage = filters.page
 
   return (
     <>
@@ -184,14 +158,16 @@ async function DirectoryContent({
               <Input
                 name="search"
                 placeholder="Search franchises..."
-                defaultValue={searchParams.search}
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
                 className="pl-10"
               />
             </div>
 
             <select
               name="category"
-              defaultValue={searchParams.category || 'all'}
+              value={filters.category}
+              onChange={(e) => setFilters({ ...filters, category: e.target.value })}
               className="h-10 rounded-md border border-input bg-background px-3 text-sm"
             >
               {CATEGORIES.map((cat) => (
@@ -201,7 +177,8 @@ async function DirectoryContent({
 
             <select
               name="investment"
-              defaultValue={searchParams.investment || 'all'}
+              value={filters.investment}
+              onChange={(e) => setFilters({ ...filters, investment: e.target.value })}
               className="h-10 rounded-md border border-input bg-background px-3 text-sm"
             >
               {INVESTMENT_RANGES.map((range) => (
@@ -209,7 +186,7 @@ async function DirectoryContent({
               ))}
             </select>
 
-            <Button type="submit">
+            <Button type="submit" onClick={(e) => { e.preventDefault(); fetchFranchises() }}>
               <Filter className="h-4 w-4 mr-2" />
               Apply
             </Button>
@@ -230,10 +207,20 @@ async function DirectoryContent({
           </Link>
         </div>
 
-        {franchises.length > 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-navy" />
+          </div>
+        ) : franchises.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {franchises.map((franchise) => (
-              <FranchiseCard key={franchise.name} franchise={franchise} />
+              <FranchiseCard 
+                key={franchise.name} 
+                franchise={franchise} 
+                onAddToCompare={handleAddToCompare}
+                isInCompare={isInCompare(franchise.name)}
+                onOpenRequestModal={handleOpenRequestModal}
+              />
             ))}
           </div>
         ) : (
@@ -250,9 +237,9 @@ async function DirectoryContent({
             {currentPage > 1 && (
               <Link 
                 href={`/directory?${new URLSearchParams({
-                  ...(searchParams.category && { category: searchParams.category }),
-                  ...(searchParams.investment && { investment: searchParams.investment }),
-                  ...(searchParams.search && { search: searchParams.search }),
+                  ...(filters.category && filters.category !== 'all' && { category: filters.category }),
+                  ...(filters.investment && filters.investment !== 'all' && { investment: filters.investment }),
+                  ...(filters.search && { search: filters.search }),
                   page: String(currentPage - 1),
                 }).toString()}`}
               >
@@ -263,9 +250,9 @@ async function DirectoryContent({
             {currentPage < totalPages && (
               <Link 
                 href={`/directory?${new URLSearchParams({
-                  ...(searchParams.category && { category: searchParams.category }),
-                  ...(searchParams.investment && { investment: searchParams.investment }),
-                  ...(searchParams.search && { search: searchParams.search }),
+                  ...(filters.category && filters.category !== 'all' && { category: filters.category }),
+                  ...(filters.investment && filters.investment !== 'all' && { investment: filters.investment }),
+                  ...(filters.search && { search: filters.search }),
                   page: String(currentPage + 1),
                 }).toString()}`}
               >
@@ -275,6 +262,17 @@ async function DirectoryContent({
           </div>
         )}
       </div>
+
+      <FloatingCompareButton 
+        compareList={compareList} 
+        onRemoveFromCompare={handleRemoveFromCompare} 
+      />
+
+      <RequestInfoModal
+        isOpen={requestModalOpen}
+        onOpenChange={setRequestModalOpen}
+        franchise={selectedFranchise}
+      />
     </>
   )
 }
