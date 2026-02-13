@@ -1,11 +1,8 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowRight, Check, Building2, Users, FileText, Scale, Briefcase, GraduationCap, Heart, Shield, Globe, Star, MapPin, Phone, Mail, Calendar } from 'lucide-react'
+import { ArrowRight, Check, FileText, Scale, Shield } from 'lucide-react'
 
 export const metadata = {
   title: 'Legal Resources | AFPA Connect',

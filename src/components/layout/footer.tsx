@@ -11,6 +11,7 @@ const footerLinks = {
     { name: 'Franchise Guide', href: '/guide' },
     { name: 'Blog', href: '/blog' },
     { name: 'FAQ', href: '/faq' },
+    { name: 'Legal Resources', href: '/legal-resources' },
     { name: 'FDD Library', href: '/fdd-library' },
   ],
   company: [
