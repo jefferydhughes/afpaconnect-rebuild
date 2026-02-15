@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -15,12 +15,24 @@ type AuthMode = 'login' | 'signup' | 'forgot'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [mode, setMode] = useState<AuthMode>('login')
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
+
+  // Show error from auth callback (e.g. expired confirmation link)
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error) {
+      toast.error(decodeURIComponent(error))
+    }
+  }, [searchParams])
+
+  // Where to send the user after login
+  const redirectTo = searchParams.get('redirect') || '/dashboard'
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,7 +47,7 @@ export default function LoginPage() {
       if (error) throw error
 
       toast.success('Welcome back!')
-      router.push('/dashboard')
+      router.push(redirectTo)
       router.refresh()
     } catch (error: any) {
       toast.error(error.message || 'Failed to sign in')
@@ -49,20 +61,37 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            full_name: fullName,
-          },
+          data: { full_name: fullName },
+          // After email confirmation, land on the callback route which
+          // creates the profile row and redirects to /dashboard
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(redirectTo)}`,
         },
       })
 
       if (error) throw error
 
-      toast.success('Check your email to confirm your account!')
-      setMode('login')
+      // If email confirmation is disabled in Supabase, the user is
+      // already signed in — create their profile and redirect now.
+      if (data.session) {
+        await supabase.from('profiles').upsert({
+          id: data.user!.id,
+          email: data.user!.email!,
+          full_name: fullName,
+          role: 'user',
+        }, { onConflict: 'id' })
+
+        toast.success('Account created! Welcome to AFPA.')
+        router.push(redirectTo)
+        router.refresh()
+      } else {
+        // Email confirmation is enabled — ask them to check their inbox
+        toast.success('Almost there! Check your email to confirm your account.')
+        setMode('login')
+      }
     } catch (error: any) {
       toast.error(error.message || 'Failed to sign up')
     } finally {
