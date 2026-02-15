@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -13,7 +13,8 @@ import { toast } from 'sonner'
 
 type AuthMode = 'login' | 'signup' | 'forgot'
 
-export default function LoginPage() {
+// Inner component — uses useSearchParams, so must be inside <Suspense>
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -341,5 +342,18 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+// Suspense wrapper required because LoginForm uses useSearchParams()
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-cream via-white to-brand-cream">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-navy" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
