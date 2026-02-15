@@ -17,11 +17,6 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: '/Quiz',
-        destination: '/quiz',
-        permanent: true,
-      },
-      {
         source: '/quiz-results',
         destination: '/quiz/results',
         permanent: true,

@@ -37,10 +37,18 @@ async function getUsers(search?: string) {
 
 const roleColors: Record<string, string> = {
   admin: 'bg-red-100 text-red-700',
-  home_office: 'bg-purple-100 text-purple-700',
   advisor: 'bg-blue-100 text-blue-700',
   franchisor: 'bg-green-100 text-green-700',
+  franchise_rep: 'bg-purple-100 text-purple-700',
   user: 'bg-gray-100 text-gray-700',
+}
+
+const roleLabels: Record<string, string> = {
+  admin: 'Admin',
+  advisor: 'Advisor',
+  franchisor: 'Franchisor',
+  franchise_rep: 'Franchise Rep',
+  user: 'User',
 }
 
 export default async function AdminUsersPage({
@@ -55,6 +63,8 @@ export default async function AdminUsersPage({
     total: users.length,
     admins: users.filter(u => u.role === 'admin').length,
     advisors: users.filter(u => u.role === 'advisor').length,
+    franchisors: users.filter(u => u.role === 'franchisor').length,
+    franchiseReps: users.filter(u => u.role === 'franchise_rep').length,
     users: users.filter(u => u.role === 'user').length,
   }
 
@@ -68,13 +78,13 @@ export default async function AdminUsersPage({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <Users className="h-8 w-8 text-gray-400" />
             <div>
               <p className="text-2xl font-bold">{stats.total}</p>
-              <p className="text-sm text-gray-500">Total Users</p>
+              <p className="text-sm text-gray-500">Total</p>
             </div>
           </CardContent>
         </Card>
@@ -100,8 +110,26 @@ export default async function AdminUsersPage({
           <CardContent className="p-4 flex items-center gap-3">
             <Users className="h-8 w-8 text-green-500" />
             <div>
+              <p className="text-2xl font-bold">{stats.franchisors}</p>
+              <p className="text-sm text-gray-500">Franchisors</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <UserCheck className="h-8 w-8 text-purple-500" />
+            <div>
+              <p className="text-2xl font-bold">{stats.franchiseReps}</p>
+              <p className="text-sm text-gray-500">Franchise Reps</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <Users className="h-8 w-8 text-gray-400" />
+            <div>
               <p className="text-2xl font-bold">{stats.users}</p>
-              <p className="text-sm text-gray-500">Regular Users</p>
+              <p className="text-sm text-gray-500">Prospects</p>
             </div>
           </CardContent>
         </Card>

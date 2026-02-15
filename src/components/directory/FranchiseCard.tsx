@@ -48,6 +48,7 @@ export default function FranchiseCard({
   } = franchise
 
   const slugName = name.toLowerCase().replace(/\s+/g, '-')
+  const detailHref = `/directory/${franchise.slug || franchise.id || slugName}`
 
   const isPremiumListing = is_featured
 
@@ -95,7 +96,7 @@ export default function FranchiseCard({
           <div className="flex-1 min-w-0">
             <CardTitle className="text-base truncate">
               <Link 
-                href={`/franchise-listing?name=${slugName}`}
+                href={detailHref}
                 className="hover:text-brand-gold transition-colors"
               >
                 {name}
@@ -191,7 +192,7 @@ export default function FranchiseCard({
             </Button>
           </div>
           
-          <Link href={`/franchise-listing?name=${slugName}`} onClick={() => window.scrollTo(0, 0)}>
+          <Link href={detailHref} onClick={() => window.scrollTo(0, 0)}>
             <Button
               variant="outline"
               className="w-full justify-center items-center"

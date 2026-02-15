@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { 
   Building2, 
   MapPin, 
@@ -31,30 +31,100 @@ import {
   getTimeCommitmentLabel 
 } from '@/lib/utils'
 
-async function getFranchise(slug: string) {
-  const supabase = createClient()
-  
-  const { data: franchise, error } = await supabase
-    .from('franchises')
-    .select('*')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single()
+type FranchisePayload = {
+  franchise: any
+  relatedFranchises: any[]
+  canonicalSlug: string
+}
 
-  if (error || !franchise) {
-    return null
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/&amp;/g, ' and ')
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function normalizeRequestedSlug(slug: string): string {
+  return slugify(decodeURIComponent(slug).replace(/andamp/gi, 'and'))
+}
+
+function unique(values: string[]): string[] {
+  return Array.from(new Set(values.filter(Boolean)))
+}
+
+async function resolveReadableTableName(
+  supabase: any,
+  preferredTable: string,
+  alternatives: string[]
+): Promise<string> {
+  const firstTry = await supabase.from(preferredTable).select('id').limit(1)
+  if (!firstTry.error) return preferredTable
+
+  for (const table of alternatives) {
+    const probe = await supabase.from(table).select('id').limit(1)
+    if (!probe.error) return table
   }
 
-  // Get related franchises in same category
-  const { data: relatedFranchises } = await supabase
-    .from('franchises')
-    .select('id, name, slug, logo_url, category, initial_investment_min, initial_investment_max')
-    .eq('category', franchise.category)
-    .eq('is_active', true)
-    .neq('id', franchise.id)
-    .limit(3)
+  return preferredTable
+}
 
-  return { franchise, relatedFranchises: relatedFranchises || [] }
+async function getFranchise(slug: string): Promise<FranchisePayload | null> {
+  const supabase = createAdminClient()
+  const franchiseTable = await resolveReadableTableName(supabase, 'franchise', ['franchises'])
+  const normalizedSlug = normalizeRequestedSlug(slug)
+  const slugCandidates = unique([
+    decodeURIComponent(slug).toLowerCase(),
+    normalizedSlug,
+    decodeURIComponent(slug).toLowerCase().replace(/andamp/g, 'and'),
+  ])
+
+  let franchise: any = null
+  for (const candidate of slugCandidates) {
+    const bySlug = await supabase.from(franchiseTable).select('*').eq('slug', candidate).maybeSingle()
+    if (bySlug.data) {
+      franchise = bySlug.data
+      break
+    }
+  }
+
+  if (!franchise) {
+    const byId = await supabase.from(franchiseTable).select('*').eq('id', slug).maybeSingle()
+    if (byId.data) {
+      franchise = byId.data
+    }
+  }
+
+  if (!franchise) {
+    const nameLike = normalizedSlug.replace(/-/g, ' ')
+    const byName = await supabase
+      .from(franchiseTable)
+      .select('*')
+      .ilike('name', `%${nameLike}%`)
+      .limit(10)
+
+    if (byName.data && byName.data.length > 0) {
+      const exact = byName.data.find((item: any) => slugify(item.slug || item.name || '') === normalizedSlug)
+      franchise = exact || byName.data[0]
+    }
+  }
+
+  if (!franchise) return null
+
+  const canonicalSlug = franchise.slug || slugify(franchise.name || franchise.id)
+  let relatedFranchises: any[] = []
+  if (franchise.category) {
+    const related = await supabase
+      .from(franchiseTable)
+      .select('id, name, slug, logo_url, category, initial_investment_min, initial_investment_max')
+      .eq('category', franchise.category)
+      .neq('id', franchise.id)
+      .limit(3)
+    relatedFranchises = related.data || []
+  }
+
+  return { franchise, relatedFranchises, canonicalSlug }
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
@@ -79,6 +149,10 @@ export default async function FranchiseDetailPage({
 
   if (!data) {
     notFound()
+  }
+
+  if (data.canonicalSlug && data.canonicalSlug !== params.slug) {
+    redirect(`/directory/${data.canonicalSlug}`)
   }
 
   const { franchise, relatedFranchises } = data
@@ -424,7 +498,7 @@ export default async function FranchiseDetailPage({
                   {relatedFranchises.map((related) => (
                     <Link
                       key={related.id}
-                      href={`/directory/${related.slug}`}
+                      href={`/directory/${related.slug || related.id}`}
                       className="flex items-center gap-3 p-3 rounded-lg border hover:border-brand-gold transition-colors"
                     >
                       <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">

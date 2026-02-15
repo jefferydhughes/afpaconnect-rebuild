@@ -16,7 +16,7 @@ export interface Database {
           full_name: string | null
           phone: string | null
           avatar_url: string | null
-          role: 'admin' | 'home_office' | 'franchisor' | 'advisor' | 'user'
+          role: 'admin' | 'franchise_rep' | 'franchisor' | 'advisor' | 'user'
           advisor_slug: string | null
           advisor_title: string | null
           advisor_bio: string | null
@@ -34,7 +34,7 @@ export interface Database {
           full_name?: string | null
           phone?: string | null
           avatar_url?: string | null
-          role?: 'admin' | 'home_office' | 'franchisor' | 'advisor' | 'user'
+          role?: 'admin' | 'franchise_rep' | 'franchisor' | 'advisor' | 'user'
           advisor_slug?: string | null
           advisor_title?: string | null
           advisor_bio?: string | null
@@ -52,7 +52,7 @@ export interface Database {
           full_name?: string | null
           phone?: string | null
           avatar_url?: string | null
-          role?: 'admin' | 'home_office' | 'franchisor' | 'advisor' | 'user'
+          role?: 'admin' | 'franchise_rep' | 'franchisor' | 'advisor' | 'user'
           advisor_slug?: string | null
           advisor_title?: string | null
           advisor_bio?: string | null

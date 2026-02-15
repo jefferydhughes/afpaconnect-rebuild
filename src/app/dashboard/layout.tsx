@@ -1,22 +1,23 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { 
-  Home, 
-  Building2, 
-  Users, 
-  FileText, 
-  Settings, 
+import {
+  Home,
+  Building2,
+  Users,
+  FileText,
+  Settings,
   BarChart3,
   LogOut,
   Target,
-  Mail
+  Mail,
+  Briefcase
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 async function getUserRole(userId: string) {
   const supabase = createClient()
-  
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('role, full_name')
@@ -26,16 +27,19 @@ async function getUserRole(userId: string) {
   return profile
 }
 
+// admin — full platform management
 const adminNavItems = [
   { href: '/dashboard/admin', label: 'Overview', icon: Home },
   { href: '/dashboard/admin/franchises', label: 'Franchises', icon: Building2 },
   { href: '/dashboard/admin/users', label: 'Users', icon: Users },
+  { href: '/dashboard/admin/advisors', label: 'Advisors', icon: Briefcase },
   { href: '/dashboard/admin/leads', label: 'Leads', icon: Mail },
   { href: '/dashboard/admin/quizzes', label: 'Quiz Results', icon: FileText },
   { href: '/dashboard/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/admin/settings', label: 'Settings', icon: Settings },
 ]
 
+// advisor — franchise consultant who earns via referrals
 const advisorNavItems = [
   { href: '/dashboard/advisor', label: 'Overview', icon: Home },
   { href: '/dashboard/advisor/leads', label: 'My Leads', icon: Users },
@@ -43,6 +47,24 @@ const advisorNavItems = [
   { href: '/dashboard/advisor/settings', label: 'Settings', icon: Settings },
 ]
 
+// franchisor — brand/franchisor managing their listings
+const franchisorNavItems = [
+  { href: '/dashboard/franchisor', label: 'Overview', icon: Home },
+  { href: '/dashboard/franchisor/listings', label: 'My Listings', icon: Building2 },
+  { href: '/dashboard/franchisor/leads', label: 'Leads', icon: Users },
+  { href: '/dashboard/franchisor/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/dashboard/franchisor/settings', label: 'Settings', icon: Settings },
+]
+
+// franchise_rep — representative for a specific franchise brand
+const franchiseRepNavItems = [
+  { href: '/dashboard/franchise-rep', label: 'Overview', icon: Home },
+  { href: '/dashboard/franchise-rep/leads', label: 'My Leads', icon: Users },
+  { href: '/dashboard/franchise-rep/applications', label: 'Applications', icon: FileText },
+  { href: '/dashboard/franchise-rep/settings', label: 'Settings', icon: Settings },
+]
+
+// user — prospective franchisee
 const userNavItems = [
   { href: '/dashboard', label: 'Overview', icon: Home },
   { href: '/quiz', label: 'Take Quiz', icon: FileText },
@@ -66,10 +88,14 @@ export default async function DashboardLayout({
   const role = profile?.role || 'user'
 
   let navItems = userNavItems
-  if (role === 'admin' || role === 'home_office') {
+  if (role === 'admin') {
     navItems = adminNavItems
   } else if (role === 'advisor') {
     navItems = advisorNavItems
+  } else if (role === 'franchisor') {
+    navItems = franchisorNavItems
+  } else if (role === 'franchise_rep') {
+    navItems = franchiseRepNavItems
   }
 
   return (
@@ -82,7 +108,7 @@ export default async function DashboardLayout({
           </div>
           <span className="font-bold text-brand-navy">AFPA</span>
         </Link>
-        <span className="text-sm text-gray-500 capitalize">{role} Dashboard</span>
+        <span className="text-sm text-gray-500 capitalize">{role.replace(/_/g, ' ')} Dashboard</span>
       </div>
 
       <div className="flex">
@@ -102,7 +128,7 @@ export default async function DashboardLayout({
             {/* Role Badge */}
             <div className="px-6 py-4 border-b">
               <p className="text-xs text-gray-500 uppercase tracking-wider">Dashboard</p>
-              <p className="font-medium text-gray-900 capitalize">{role}</p>
+              <p className="font-medium text-gray-900 capitalize">{role.replace(/_/g, ' ')}</p>
               {profile?.full_name && (
                 <p className="text-sm text-gray-500 truncate">{profile.full_name}</p>
               )}

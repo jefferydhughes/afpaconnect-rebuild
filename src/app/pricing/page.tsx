@@ -73,30 +73,30 @@ const pricingPlans = [
   }
 ]
 
-const brokerPlans = [
+const advisorPlans = [
   {
-    name: 'Broker Starter',
+    name: 'Advisor Starter',
     price: '$299',
     period: 'per month',
-    description: 'Perfect for new franchise brokers',
+    description: 'Perfect for new franchise advisors',
     features: [
       'Up to 10 franchise listings',
-      'Basic broker profile',
+      'Basic advisor profile',
       'Lead capture forms',
       'Contact management',
       'Email integration'
     ],
-    buttonText: 'Start Brokering',
+    buttonText: 'Start Advising',
     buttonVariant: 'outline'
   },
   {
-    name: 'Broker Professional',
+    name: 'Advisor Professional',
     price: '$599',
     period: 'per month',
-    description: 'For established franchise brokers',
+    description: 'For established franchise advisors',
     features: [
       'Up to 50 franchise listings',
-      'Enhanced broker profile',
+      'Enhanced advisor profile',
       'Advanced lead management',
       'CRM integration',
       'Custom landing pages',
@@ -244,17 +244,17 @@ export default function PricingPage() {
           </Card>
         </section>
 
-        {/* Broker Plans */}
+        {/* Advisor Plans */}
         <section className="mb-20">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Franchise Broker Plans</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Franchise Advisor Plans</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive tools for franchise brokers and consultants
+              Comprehensive tools for franchise advisors and consultants
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {brokerPlans.map((plan, index) => (
+            {advisorPlans.map((plan, index) => (
               <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow bg-white">
                 <CardHeader className="text-center pt-8 pb-8">
                   <CardTitle className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</CardTitle>

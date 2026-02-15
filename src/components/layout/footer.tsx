@@ -12,17 +12,17 @@ const footerLinks = {
     { name: 'Blog', href: '/blog' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Legal Resources', href: '/legal-resources' },
-    { name: 'FDD Library', href: '/fdd-library' },
+    { name: 'FDD Library', href: '/legal-resources' },
   ],
   company: [
     { name: 'About Us', href: '/about' },
-    { name: 'Our Team', href: '/team' },
+    { name: 'Our Team', href: '/our-team' },
     { name: 'Contact', href: '/contact' },
     { name: 'Become an Advisor', href: '/become-advisor' },
   ],
   legal: [
-    { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Terms of Service', href: '/terms' },
+    { name: 'Privacy Policy', href: '/privacy-policy' },
+    { name: 'Terms of Service', href: '/terms-and-conditions' },
   ],
 }
 

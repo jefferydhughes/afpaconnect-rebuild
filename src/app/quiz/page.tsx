@@ -16,6 +16,59 @@ import {
   Loader2 
 } from 'lucide-react'
 
+const US_STATES = [
+  { value: 'AL', label: 'Alabama', icon: '📍' },
+  { value: 'AK', label: 'Alaska', icon: '📍' },
+  { value: 'AZ', label: 'Arizona', icon: '📍' },
+  { value: 'AR', label: 'Arkansas', icon: '📍' },
+  { value: 'CA', label: 'California', icon: '📍' },
+  { value: 'CO', label: 'Colorado', icon: '📍' },
+  { value: 'CT', label: 'Connecticut', icon: '📍' },
+  { value: 'DE', label: 'Delaware', icon: '📍' },
+  { value: 'FL', label: 'Florida', icon: '📍' },
+  { value: 'GA', label: 'Georgia', icon: '📍' },
+  { value: 'HI', label: 'Hawaii', icon: '📍' },
+  { value: 'ID', label: 'Idaho', icon: '📍' },
+  { value: 'IL', label: 'Illinois', icon: '📍' },
+  { value: 'IN', label: 'Indiana', icon: '📍' },
+  { value: 'IA', label: 'Iowa', icon: '📍' },
+  { value: 'KS', label: 'Kansas', icon: '📍' },
+  { value: 'KY', label: 'Kentucky', icon: '📍' },
+  { value: 'LA', label: 'Louisiana', icon: '📍' },
+  { value: 'ME', label: 'Maine', icon: '📍' },
+  { value: 'MD', label: 'Maryland', icon: '📍' },
+  { value: 'MA', label: 'Massachusetts', icon: '📍' },
+  { value: 'MI', label: 'Michigan', icon: '📍' },
+  { value: 'MN', label: 'Minnesota', icon: '📍' },
+  { value: 'MS', label: 'Mississippi', icon: '📍' },
+  { value: 'MO', label: 'Missouri', icon: '📍' },
+  { value: 'MT', label: 'Montana', icon: '📍' },
+  { value: 'NE', label: 'Nebraska', icon: '📍' },
+  { value: 'NV', label: 'Nevada', icon: '📍' },
+  { value: 'NH', label: 'New Hampshire', icon: '📍' },
+  { value: 'NJ', label: 'New Jersey', icon: '📍' },
+  { value: 'NM', label: 'New Mexico', icon: '📍' },
+  { value: 'NY', label: 'New York', icon: '📍' },
+  { value: 'NC', label: 'North Carolina', icon: '📍' },
+  { value: 'ND', label: 'North Dakota', icon: '📍' },
+  { value: 'OH', label: 'Ohio', icon: '📍' },
+  { value: 'OK', label: 'Oklahoma', icon: '📍' },
+  { value: 'OR', label: 'Oregon', icon: '📍' },
+  { value: 'PA', label: 'Pennsylvania', icon: '📍' },
+  { value: 'RI', label: 'Rhode Island', icon: '📍' },
+  { value: 'SC', label: 'South Carolina', icon: '📍' },
+  { value: 'SD', label: 'South Dakota', icon: '📍' },
+  { value: 'TN', label: 'Tennessee', icon: '📍' },
+  { value: 'TX', label: 'Texas', icon: '📍' },
+  { value: 'UT', label: 'Utah', icon: '📍' },
+  { value: 'VT', label: 'Vermont', icon: '📍' },
+  { value: 'VA', label: 'Virginia', icon: '📍' },
+  { value: 'WA', label: 'Washington', icon: '📍' },
+  { value: 'WV', label: 'West Virginia', icon: '📍' },
+  { value: 'WI', label: 'Wisconsin', icon: '📍' },
+  { value: 'WY', label: 'Wyoming', icon: '📍' },
+]
+
 // Quiz questions configuration
 const QUIZ_QUESTIONS = [
   {
@@ -81,6 +134,13 @@ const QUIZ_QUESTIONS = [
       { value: 'some', label: 'Some experience', icon: '📊' },
       { value: 'extensive', label: 'Extensive experience', icon: '🎯' },
     ],
+  },
+  {
+    id: 'territory',
+    prompt: 'Where would you like to open your franchise? (Select all that apply)',
+    type: 'multi_choice',
+    icon: '📍',
+    options: US_STATES,
   },
   {
     id: 'goals',
@@ -154,6 +214,7 @@ type QuizAnswers = {
   business_model?: string
   time_commitment?: string
   experience?: string
+  territory?: string[]
   goals?: string[]
   contact?: {
     firstName: string
@@ -173,6 +234,8 @@ export default function QuizPage() {
   const [showOptions, setShowOptions] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [quizResultId, setQuizResultId] = useState<string | null>(null)
+  const [territorySearch, setTerritorySearch] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const currentQuestion = QUIZ_QUESTIONS[currentQuestionIndex]
@@ -293,8 +356,21 @@ export default function QuizPage() {
     
     if (nextIndex < QUIZ_QUESTIONS.length) {
       setCurrentQuestionIndex(nextIndex)
+      setTerritorySearch('')
       addBotMessage(QUIZ_QUESTIONS[nextIndex].prompt)
     }
+  }
+
+  const goToResults = (resultId: string) => {
+    const target = `/quiz/results?id=${resultId}`
+    router.push(target)
+
+    // Fallback hard navigation if client routing does not transition.
+    setTimeout(() => {
+      if (window.location.pathname === '/quiz') {
+        window.location.href = target
+      }
+    }, 900)
   }
 
   const submitQuiz = async (finalAnswers: QuizAnswers) => {
@@ -315,12 +391,36 @@ export default function QuizPage() {
         }),
       })
 
-      if (!response.ok) throw new Error('Failed to submit quiz')
+      let responseData: any = null
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        responseData = await response.json().catch(() => null)
+      } else {
+        responseData = await response.text().catch(() => null)
+      }
+
+      if (!response.ok) {
+        const apiError =
+          typeof responseData === 'string'
+            ? responseData
+            : responseData?.details || responseData?.error || `HTTP ${response.status}`
+        throw new Error(apiError)
+      }
       
-      const { quizResultId } = await response.json()
-      
-      // Redirect to results
-      router.push(`/quiz/results?id=${quizResultId}`)
+      const createdQuizResultId = responseData?.quizResultId
+      if (!createdQuizResultId) throw new Error('Quiz submitted but no result id returned')
+
+      localStorage.setItem('afpa_last_quiz_result_id', createdQuizResultId)
+      document.cookie = `afpa_last_quiz_result_id=${encodeURIComponent(createdQuizResultId)}; Path=/; Max-Age=31536000; SameSite=Lax`
+      setQuizResultId(createdQuizResultId)
+      setMessages((prev) => [
+        ...prev,
+        { type: 'bot', text: 'Your rankings are ready. Click "View My Matches" to open your results.' },
+      ])
+      setIsSubmitting(false)
+
+      // Redirect automatically, while still exposing a manual button fallback.
+      goToResults(createdQuizResultId)
     } catch (error) {
       console.error('Quiz submission error:', error)
       setMessages((prev) => [
@@ -339,6 +439,8 @@ export default function QuizPage() {
     setShowOptions(false)
     setHasStarted(false)
     setIsSubmitting(false)
+    setQuizResultId(null)
+    setTerritorySearch('')
   }
 
   return (
@@ -468,8 +570,22 @@ export default function QuizPage() {
 
                     {currentQuestion.type === 'multi_choice' && (
                       <div className="space-y-4">
+                        {currentQuestion.id === 'territory' && (
+                          <Input
+                            value={territorySearch}
+                            onChange={(e) => setTerritorySearch(e.target.value)}
+                            placeholder="Search states..."
+                          />
+                        )}
                         <div className="grid gap-2">
-                          {currentQuestion.options?.map((option) => (
+                          {currentQuestion.options
+                            ?.filter((option) =>
+                              currentQuestion.id !== 'territory'
+                                ? true
+                                : option.label.toLowerCase().includes(territorySearch.toLowerCase()) ||
+                                  option.value.toLowerCase().includes(territorySearch.toLowerCase())
+                            )
+                            .map((option) => (
                             <button
                               key={option.value}
                               onClick={() => handleMultiSelect(option.value)}
@@ -478,7 +594,7 @@ export default function QuizPage() {
                                 multiSelectAnswers.includes(option.value) && 'selected'
                               )}
                             >
-                              <span className="text-xl">{option.icon}</span>
+                              <span className="text-xl">{option.icon || '📍'}</span>
                               <span className="font-medium flex-1">{option.label}</span>
                               {multiSelectAnswers.includes(option.value) && (
                                 <CheckCircle className="w-5 h-5 text-brand-gold" />
@@ -556,6 +672,18 @@ export default function QuizPage() {
                     <p className="text-gray-600 mt-4">Finding your perfect matches...</p>
                   </div>
                 )}
+
+                {quizResultId && !isSubmitting && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-700 mb-4">Your results are ready.</p>
+                    <Button
+                      onClick={() => goToResults(quizResultId)}
+                      className="bg-brand-navy text-brand-gold hover:bg-brand-navy-light"
+                    >
+                      View My Matches
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
@@ -564,3 +692,4 @@ export default function QuizPage() {
     </div>
   )
 }
+

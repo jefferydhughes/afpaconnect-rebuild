@@ -12,7 +12,8 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 
 const features = [
   {
@@ -55,6 +56,16 @@ const categories = [
 
 export default async function HomePage() {
   const supabase = createClient()
+  const adminSupabase = createAdminClient()
+  const cookieStore = cookies()
+  const lastQuizResultId = cookieStore.get('afpa_last_quiz_result_id')?.value?.trim() || null
+  const hasSavedMatches =
+    Boolean(lastQuizResultId) &&
+    isUuid(lastQuizResultId as string) &&
+    (await quizResultExists(adminSupabase, lastQuizResultId as string))
+  const matchesHref = hasSavedMatches
+    ? `/quiz/results?id=${encodeURIComponent(lastQuizResultId as string)}`
+    : '/quiz'
   
   // Fetch featured franchises
   const { data: featuredFranchises } = await supabase
@@ -85,9 +96,9 @@ export default async function HomePage() {
               </p>
               
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">
-                <Link href="/quiz">
+                <Link href={matchesHref}>
                   <Button size="lg" className="w-full sm:w-auto bg-brand-navy text-brand-gold hover:bg-brand-navy-light text-lg px-8 py-6">
-                    Take the Free Quiz
+                    {hasSavedMatches ? 'View My Matches' : 'Take the Free Quiz'}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
@@ -194,9 +205,9 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-12 text-center">
-            <Link href="/quiz">
+            <Link href={matchesHref}>
               <Button size="lg" className="bg-brand-gold text-brand-navy hover:bg-brand-gold-light">
-                Start Your Free Quiz
+                {hasSavedMatches ? 'View My Matches' : 'Start Your Free Quiz'}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -314,9 +325,9 @@ export default async function HomePage() {
             business ownership with our AI-powered matching system.
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Link href="/quiz">
+            <Link href={matchesHref}>
               <Button size="lg" className="w-full sm:w-auto bg-brand-gold text-brand-navy hover:bg-brand-gold-light text-lg px-8 py-6">
-                Take the Free Quiz Now
+                {hasSavedMatches ? 'View My Matches' : 'Take the Free Quiz Now'}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -330,4 +341,18 @@ export default async function HomePage() {
       </section>
     </div>
   )
+}
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+}
+
+async function quizResultExists(supabase: any, id: string): Promise<boolean> {
+  const primary = await supabase.from('quiz_result').select('id').eq('id', id).maybeSingle()
+  if (!primary.error) return Boolean(primary.data?.id)
+
+  const fallback = await supabase.from('quiz_results').select('id').eq('id', id).maybeSingle()
+  if (!fallback.error) return Boolean(fallback.data?.id)
+
+  return false
 }

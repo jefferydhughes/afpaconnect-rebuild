@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -18,31 +18,56 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Badge } from '@/components/ui/badge'
 import { formatInvestmentRange, getMatchTier, getCategoryLabel } from '@/lib/utils'
 
+async function resolveReadableTableName(
+  supabase: any,
+  preferredTable: string,
+  alternatives: string[]
+): Promise<string> {
+  const firstTry = await supabase.from(preferredTable).select('id').limit(1)
+  if (!firstTry.error) return preferredTable
+
+  for (const table of alternatives) {
+    const probe = await supabase.from(table).select('id').limit(1)
+    if (!probe.error) return table
+  }
+
+  return preferredTable
+}
+
 async function getQuizResults(id: string) {
-  const supabase = createClient()
-  
+  const supabase = createAdminClient()
+
+  const quizTable = await resolveReadableTableName(supabase, 'quiz_result', ['quiz_results'])
+
   // Get quiz result
   const { data: quizResult, error } = await supabase
-    .from('quiz_results')
+    .from(quizTable)
     .select('*')
     .eq('id', id)
-    .single()
+    .maybeSingle()
 
   if (error || !quizResult) {
     return null
   }
 
+  const matchScores = (quizResult.match_scores as Record<string, any>) || {}
+  const matchedIds = Array.isArray(quizResult.matched_franchises)
+    ? quizResult.matched_franchises
+    : Object.keys(matchScores)
+
+  const franchiseTable = await resolveReadableTableName(supabase, 'franchise', ['franchises'])
+
   // Get matched franchises
   let franchises: any[] = []
-  if (quizResult.matched_franchises && quizResult.matched_franchises.length > 0) {
-    const { data } = await supabase
-      .from('franchises')
+  if (matchedIds.length > 0) {
+    const { data, error: franchiseError } = await supabase
+      .from(franchiseTable)
       .select('*')
-      .in('id', quizResult.matched_franchises)
+      .in('id', matchedIds)
+      .limit(50)
 
-    if (data) {
+    if (!franchiseError && data) {
       // Sort by match score
-      const matchScores = quizResult.match_scores as Record<string, any> || {}
       franchises = data.sort((a, b) => {
         const scoreA = matchScores[a.id]?.score || 0
         const scoreB = matchScores[b.id]?.score || 0
@@ -136,7 +161,7 @@ function FranchiseCard({
 
       <CardFooter className="flex gap-2 pt-4 border-t">
         <Button variant="outline" className="flex-1" asChild>
-          <Link href={`/directory/${franchise.slug}`}>
+          <Link href={`/directory/${franchise.slug || franchise.id}`}>
             <BarChart3 className="h-4 w-4 mr-2" />
             View Details
           </Link>

@@ -302,11 +302,11 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           By continuing, you agree to our{' '}
-          <Link href="/terms" className="text-brand-gold hover:underline">
+          <Link href="/terms-and-conditions" className="text-brand-gold hover:underline">
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link href="/privacy" className="text-brand-gold hover:underline">
+          <Link href="/privacy-policy" className="text-brand-gold hover:underline">
             Privacy Policy
           </Link>
         </p>
