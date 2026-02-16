@@ -1,11 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
-import { 
-  User, 
-  MapPin, 
-  Phone, 
-  Mail, 
+import {
+  User,
+  MapPin,
+  Phone,
+  Mail,
   Calendar,
   Star,
   CheckCircle,
@@ -17,13 +17,13 @@ import { Badge } from '@/components/ui/badge'
 
 async function getAdvisors() {
   const supabase = createClient()
-  
+
   const { data: advisors } = await supabase
-    .from('profiles')
+    .from('advisor')
     .select('*')
-    .eq('role', 'advisor')
-    .eq('advisor_is_active', true)
-    .order('full_name')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true, nullsFirst: false })
+    .order('name', { ascending: true })
 
   return advisors || []
 }
@@ -46,7 +46,7 @@ export default async function AdvisorsPage() {
               Find Your Franchise Advisor
             </h1>
             <p className="text-xl text-gray-300 mb-6">
-              Connect with certified franchise advisors who understand your goals 
+              Connect with certified franchise advisors who understand your goals
               and can guide you to the perfect franchise opportunity.
             </p>
             <div className="flex flex-wrap gap-4">
@@ -111,7 +111,7 @@ export default async function AdvisorsPage() {
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Our Advisors</h2>
             <p className="text-gray-600">
-              {advisors.length} certified franchise advisors ready to help
+              {advisors.length} certified franchise advisor{advisors.length !== 1 ? 's' : ''} ready to help
             </p>
           </div>
           <Link href="/quiz">
@@ -129,13 +129,11 @@ export default async function AdvisorsPage() {
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4 mb-4">
                     <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {advisor.advisor_image_url ? (
-                        <Image
-                          src={advisor.advisor_image_url}
-                          alt={advisor.full_name || 'Advisor'}
-                          width={64}
-                          height={64}
-                          className="object-cover w-full h-full"
+                      {advisor.image_url ? (
+                        <img
+                          src={advisor.image_url}
+                          alt={advisor.name || 'Advisor'}
+                          className="object-cover w-full h-full rounded-full"
                         />
                       ) : (
                         <User className="h-8 w-8 text-gray-400" />
@@ -143,25 +141,31 @@ export default async function AdvisorsPage() {
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-900">
-                        {advisor.full_name || 'Franchise Advisor'}
+                        {advisor.name || 'Franchise Advisor'}
                       </h3>
-                      {advisor.advisor_title && (
-                        <p className="text-sm text-brand-gold">{advisor.advisor_title}</p>
+                      {advisor.title && (
+                        <p className="text-sm text-brand-gold">{advisor.title}</p>
+                      )}
+                      {advisor.city && advisor.state && (
+                        <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                          <MapPin className="h-3 w-3" />
+                          {advisor.city}, {advisor.state}
+                        </p>
                       )}
                     </div>
                   </div>
 
-                  {advisor.advisor_bio && (
+                  {advisor.bio && (
                     <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                      {advisor.advisor_bio}
+                      {advisor.bio}
                     </p>
                   )}
 
-                  {advisor.advisor_specialties && advisor.advisor_specialties.length > 0 && (
+                  {advisor.specialties && advisor.specialties.length > 0 && (
                     <div className="mb-4">
                       <p className="text-xs text-gray-500 mb-2">Specialties:</p>
                       <div className="flex flex-wrap gap-1">
-                        {advisor.advisor_specialties.slice(0, 4).map((specialty) => (
+                        {advisor.specialties.slice(0, 4).map((specialty) => (
                           <Badge key={specialty} variant="outline" className="text-xs">
                             {specialty}
                           </Badge>
@@ -171,13 +175,13 @@ export default async function AdvisorsPage() {
                   )}
 
                   <div className="flex gap-2">
-                    {advisor.advisor_calendar_url ? (
-                      <a href={advisor.advisor_calendar_url} target="_blank" rel="noopener noreferrer" className="flex-1">
+                    {advisor.calendar_embed_code ? (
+                      <Link href={`/advisors/${advisor.id}`} className="flex-1">
                         <Button className="w-full bg-brand-navy text-brand-gold hover:bg-brand-navy-light">
                           <Calendar className="mr-2 h-4 w-4" />
                           Schedule Call
                         </Button>
-                      </a>
+                      </Link>
                     ) : advisor.email ? (
                       <a href={`mailto:${advisor.email}`} className="flex-1">
                         <Button className="w-full bg-brand-navy text-brand-gold hover:bg-brand-navy-light">
@@ -226,7 +230,7 @@ export default async function AdvisorsPage() {
             Not Ready to Talk Yet?
           </h2>
           <p className="text-gray-600 mb-6">
-            Take our free 3-minute quiz to discover franchises that match your goals, 
+            Take our free 3-minute quiz to discover franchises that match your goals,
             budget, and lifestyle. No commitment required.
           </p>
           <Link href="/quiz">

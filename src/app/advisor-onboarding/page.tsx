@@ -37,15 +37,12 @@ const US_STATES = [
   { value: 'WI', label: 'Wisconsin' }, { value: 'WY', label: 'Wyoming' },
 ]
 
-function slugify(name: string) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-}
-
 export default function AdvisorOnboardingPage() {
   const router = useRouter()
   const supabase = createClient()
   const [isLoading, setIsLoading] = useState(true)
   const [userName, setUserName] = useState('')
+  const [advisorId, setAdvisorId] = useState<string | null>(null)
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCustomTitle, setShowCustomTitle] = useState(false)
@@ -54,22 +51,22 @@ export default function AdvisorOnboardingPage() {
   const [newTestimonial, setNewTestimonial] = useState({ quote: '', author: '' })
 
   const [formData, setFormData] = useState({
-    full_name: '',
-    advisor_title: '',
+    name: '',
+    title: '',
     phone: '',
-    advisor_city: '',
-    advisor_state: '',
-    advisor_years_experience: '',
-    advisor_linkedin: '',
-    advisor_bio: '',
-    advisor_personal_quote: '',
-    advisor_credentials: [] as string[],
-    advisor_specialties: [] as string[],
-    advisor_image_url: '',
-    advisor_video_url: '',
-    advisor_calendar_embed_code: '',
-    advisor_blog_url: '',
-    advisor_testimonials: [] as { quote: string; author: string }[],
+    city: '',
+    state: '',
+    years_experience: '',
+    linkedin: '',
+    bio: '',
+    personal_quote: '',
+    credentials: [] as string[],
+    specialties: [] as string[],
+    image_url: '',
+    video_url: '',
+    calendar_embed_code: '',
+    blog_url: '',
+    testimonials: [] as { quote: string; author: string }[],
   })
 
   useEffect(() => {
@@ -80,9 +77,10 @@ export default function AdvisorOnboardingPage() {
         return
       }
 
+      // Check if user has advisor role in profiles
       const { data: profile } = await supabase
         .from('profiles')
-        .select('*')
+        .select('role, full_name, email')
         .eq('id', user.id)
         .single()
 
@@ -91,36 +89,52 @@ export default function AdvisorOnboardingPage() {
         return
       }
 
-      // If already onboarded (has bio + calendar), go to dashboard
-      if (profile.advisor_bio && profile.advisor_calendar_embed_code) {
-        router.push('/dashboard/advisor')
-        return
-      }
+      // Look up their advisor record by email
+      const { data: advisor } = await supabase
+        .from('advisor')
+        .select('*')
+        .eq('email', user.email)
+        .single()
 
-      // Pre-fill form with existing data
-      setUserName(profile.full_name?.split(' ')[0] || '')
-      setFormData(prev => ({
-        ...prev,
-        full_name: profile.full_name || '',
-        advisor_title: profile.advisor_title || '',
-        phone: profile.phone || '',
-        advisor_city: profile.advisor_city || '',
-        advisor_state: profile.advisor_state || '',
-        advisor_years_experience: profile.advisor_years_experience?.toString() || '',
-        advisor_linkedin: profile.advisor_linkedin || '',
-        advisor_bio: profile.advisor_bio || '',
-        advisor_personal_quote: profile.advisor_personal_quote || '',
-        advisor_credentials: profile.advisor_credentials || [],
-        advisor_specialties: profile.advisor_specialties || [],
-        advisor_image_url: profile.advisor_image_url || '',
-        advisor_video_url: profile.advisor_video_url || '',
-        advisor_calendar_embed_code: profile.advisor_calendar_embed_code || '',
-        advisor_blog_url: profile.advisor_blog_url || '',
-        advisor_testimonials: profile.advisor_testimonials || [],
-      }))
+      if (advisor) {
+        // If already onboarded (has bio + calendar), go to dashboard
+        if (advisor.bio && advisor.calendar_embed_code) {
+          router.push('/dashboard/advisor')
+          return
+        }
 
-      if (profile.advisor_title && !TITLE_OPTIONS.includes(profile.advisor_title)) {
-        setShowCustomTitle(true)
+        setAdvisorId(advisor.id)
+        setUserName(advisor.name?.split(' ')[0] || profile.full_name?.split(' ')[0] || '')
+        setFormData(prev => ({
+          ...prev,
+          name: advisor.name || profile.full_name || '',
+          title: advisor.title || '',
+          phone: advisor.phone || '',
+          city: advisor.city || '',
+          state: advisor.state || '',
+          years_experience: advisor.years_experience?.toString() || '',
+          linkedin: advisor.linkedin || '',
+          bio: advisor.bio || '',
+          personal_quote: advisor.personal_quote || '',
+          credentials: advisor.credentials || [],
+          specialties: advisor.specialties || [],
+          image_url: advisor.image_url || '',
+          video_url: advisor.video_url || '',
+          calendar_embed_code: advisor.calendar_embed_code || '',
+          blog_url: advisor.blog_url || '',
+          testimonials: advisor.testimonials || [],
+        }))
+
+        if (advisor.title && !TITLE_OPTIONS.includes(advisor.title)) {
+          setShowCustomTitle(true)
+        }
+      } else {
+        // No advisor record yet — they'll create one on submit
+        setUserName(profile.full_name?.split(' ')[0] || '')
+        setFormData(prev => ({
+          ...prev,
+          name: profile.full_name || '',
+        }))
       }
 
       setIsLoading(false)
@@ -135,10 +149,10 @@ export default function AdvisorOnboardingPage() {
   function handleTitleChange(value: string) {
     if (value === 'custom') {
       setShowCustomTitle(true)
-      handleChange('advisor_title', '')
+      handleChange('title', '')
     } else {
       setShowCustomTitle(false)
-      handleChange('advisor_title', value)
+      handleChange('title', value)
     }
   }
 
@@ -147,34 +161,45 @@ export default function AdvisorOnboardingPage() {
     setIsSubmitting(true)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      const payload = {
+        name: formData.name,
+        title: formData.title || null,
+        phone: formData.phone || null,
+        city: formData.city || null,
+        state: formData.state || null,
+        years_experience: formData.years_experience ? parseInt(formData.years_experience) : null,
+        linkedin: formData.linkedin || null,
+        bio: formData.bio || null,
+        personal_quote: formData.personal_quote || null,
+        credentials: formData.credentials.length > 0 ? formData.credentials : null,
+        specialties: formData.specialties.length > 0 ? formData.specialties : null,
+        image_url: formData.image_url || null,
+        video_url: formData.video_url || null,
+        calendar_embed_code: formData.calendar_embed_code || null,
+        blog_url: formData.blog_url || null,
+        testimonials: formData.testimonials.length > 0 ? formData.testimonials : null,
+        is_active: true,
+      }
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: formData.full_name,
-          phone: formData.phone || null,
-          advisor_slug: slugify(formData.full_name),
-          advisor_title: formData.advisor_title || null,
-          advisor_city: formData.advisor_city || null,
-          advisor_state: formData.advisor_state || null,
-          advisor_years_experience: formData.advisor_years_experience ? parseInt(formData.advisor_years_experience) : null,
-          advisor_linkedin: formData.advisor_linkedin || null,
-          advisor_bio: formData.advisor_bio || null,
-          advisor_personal_quote: formData.advisor_personal_quote || null,
-          advisor_credentials: formData.advisor_credentials.length > 0 ? formData.advisor_credentials : null,
-          advisor_specialties: formData.advisor_specialties.length > 0 ? formData.advisor_specialties : null,
-          advisor_image_url: formData.advisor_image_url || null,
-          advisor_video_url: formData.advisor_video_url || null,
-          advisor_calendar_embed_code: formData.advisor_calendar_embed_code || null,
-          advisor_blog_url: formData.advisor_blog_url || null,
-          advisor_testimonials: formData.advisor_testimonials.length > 0 ? formData.advisor_testimonials : null,
-          advisor_is_active: true,
-        })
-        .eq('id', user.id)
-
-      if (error) throw error
+      if (advisorId) {
+        // Update existing advisor record
+        const { error } = await supabase
+          .from('advisor')
+          .update(payload)
+          .eq('id', advisorId)
+        if (error) throw error
+      } else {
+        // Create new advisor record
+        const { data: { user } } = await supabase.auth.getUser()
+        const { error } = await supabase
+          .from('advisor')
+          .insert({
+            ...payload,
+            email: user?.email || null,
+            created_by: user?.id || null,
+          })
+        if (error) throw error
+      }
 
       window.location.href = '/dashboard/advisor'
     } catch (err) {
@@ -226,15 +251,15 @@ export default function AdvisorOnboardingPage() {
                     <div>
                       <Label>Full Name *</Label>
                       <Input
-                        value={formData.full_name}
-                        onChange={e => handleChange('full_name', e.target.value)}
+                        value={formData.name}
+                        onChange={e => handleChange('name', e.target.value)}
                         required
                       />
                     </div>
                     <div>
                       <Label>Title *</Label>
                       <select
-                        value={showCustomTitle ? 'custom' : formData.advisor_title}
+                        value={showCustomTitle ? 'custom' : formData.title}
                         onChange={e => handleTitleChange(e.target.value)}
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy"
                         required={!showCustomTitle}
@@ -247,8 +272,8 @@ export default function AdvisorOnboardingPage() {
                         <Input
                           className="mt-2"
                           placeholder="Enter custom title"
-                          value={formData.advisor_title}
-                          onChange={e => handleChange('advisor_title', e.target.value)}
+                          value={formData.title}
+                          onChange={e => handleChange('title', e.target.value)}
                           required
                         />
                       )}
@@ -265,16 +290,16 @@ export default function AdvisorOnboardingPage() {
                       <Label>Years of Experience</Label>
                       <Input
                         type="number"
-                        value={formData.advisor_years_experience}
-                        onChange={e => handleChange('advisor_years_experience', e.target.value)}
+                        value={formData.years_experience}
+                        onChange={e => handleChange('years_experience', e.target.value)}
                         placeholder="e.g., 5"
                       />
                     </div>
                     <div>
                       <Label>City *</Label>
                       <Input
-                        value={formData.advisor_city}
-                        onChange={e => handleChange('advisor_city', e.target.value)}
+                        value={formData.city}
+                        onChange={e => handleChange('city', e.target.value)}
                         placeholder="e.g., Dallas"
                         required
                       />
@@ -282,15 +307,15 @@ export default function AdvisorOnboardingPage() {
                     <div>
                       <Label>State *</Label>
                       <select
-                        value={formData.advisor_state}
-                        onChange={e => handleChange('advisor_state', e.target.value)}
+                        value={formData.state}
+                        onChange={e => handleChange('state', e.target.value)}
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy"
                         required
                       >
                         <option value="">Select state</option>
                         {US_STATES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                       </select>
-                      {formData.advisor_city && formData.advisor_state && (
+                      {formData.city && formData.state && (
                         <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
                           <MapPin className="w-3 h-3" /> You&apos;ll appear on the Find an Advisor map
                         </p>
@@ -300,8 +325,8 @@ export default function AdvisorOnboardingPage() {
                       <Label>LinkedIn Profile URL</Label>
                       <Input
                         type="url"
-                        value={formData.advisor_linkedin}
-                        onChange={e => handleChange('advisor_linkedin', e.target.value)}
+                        value={formData.linkedin}
+                        onChange={e => handleChange('linkedin', e.target.value)}
                         placeholder="https://linkedin.com/in/username"
                       />
                     </div>
@@ -319,8 +344,8 @@ export default function AdvisorOnboardingPage() {
                   <div>
                     <Label>Professional Biography *</Label>
                     <Textarea
-                      value={formData.advisor_bio}
-                      onChange={e => handleChange('advisor_bio', e.target.value)}
+                      value={formData.bio}
+                      onChange={e => handleChange('bio', e.target.value)}
                       rows={6}
                       placeholder="Share your professional background, expertise, and what makes you passionate about helping franchisees..."
                       required
@@ -329,8 +354,8 @@ export default function AdvisorOnboardingPage() {
                   <div>
                     <Label>Personal Quote</Label>
                     <Textarea
-                      value={formData.advisor_personal_quote}
-                      onChange={e => handleChange('advisor_personal_quote', e.target.value)}
+                      value={formData.personal_quote}
+                      onChange={e => handleChange('personal_quote', e.target.value)}
                       placeholder="A short, impactful quote that represents your philosophy..."
                       rows={3}
                     />
@@ -339,11 +364,11 @@ export default function AdvisorOnboardingPage() {
                   <div>
                     <Label>Professional Credentials</Label>
                     <div className="space-y-2 mt-1">
-                      {formData.advisor_credentials.map((cred, i) => (
+                      {formData.credentials.map((cred, i) => (
                         <div key={i} className="flex items-center gap-2">
                           <Input value={cred} disabled className="flex-1 bg-slate-50" />
                           <Button type="button" variant="outline" size="sm" onClick={() => {
-                            setFormData(prev => ({ ...prev, advisor_credentials: prev.advisor_credentials.filter((_, idx) => idx !== i) }))
+                            setFormData(prev => ({ ...prev, credentials: prev.credentials.filter((_, idx) => idx !== i) }))
                           }}><X className="w-4 h-4" /></Button>
                         </div>
                       ))}
@@ -356,7 +381,7 @@ export default function AdvisorOnboardingPage() {
                             if (e.key === 'Enter') {
                               e.preventDefault()
                               if (newCredential.trim()) {
-                                setFormData(prev => ({ ...prev, advisor_credentials: [...prev.advisor_credentials, newCredential.trim()] }))
+                                setFormData(prev => ({ ...prev, credentials: [...prev.credentials, newCredential.trim()] }))
                                 setNewCredential('')
                               }
                             }
@@ -364,7 +389,7 @@ export default function AdvisorOnboardingPage() {
                         />
                         <Button type="button" variant="outline" onClick={() => {
                           if (newCredential.trim()) {
-                            setFormData(prev => ({ ...prev, advisor_credentials: [...prev.advisor_credentials, newCredential.trim()] }))
+                            setFormData(prev => ({ ...prev, credentials: [...prev.credentials, newCredential.trim()] }))
                             setNewCredential('')
                           }
                         }}><Plus className="w-4 h-4" /></Button>
@@ -375,11 +400,11 @@ export default function AdvisorOnboardingPage() {
                   <div>
                     <Label>Areas of Expertise</Label>
                     <div className="space-y-2 mt-1">
-                      {formData.advisor_specialties.map((spec, i) => (
+                      {formData.specialties.map((spec, i) => (
                         <div key={i} className="flex items-center gap-2">
                           <Input value={spec} disabled className="flex-1 bg-slate-50" />
                           <Button type="button" variant="outline" size="sm" onClick={() => {
-                            setFormData(prev => ({ ...prev, advisor_specialties: prev.advisor_specialties.filter((_, idx) => idx !== i) }))
+                            setFormData(prev => ({ ...prev, specialties: prev.specialties.filter((_, idx) => idx !== i) }))
                           }}><X className="w-4 h-4" /></Button>
                         </div>
                       ))}
@@ -392,7 +417,7 @@ export default function AdvisorOnboardingPage() {
                             if (e.key === 'Enter') {
                               e.preventDefault()
                               if (newSpecialty.trim()) {
-                                setFormData(prev => ({ ...prev, advisor_specialties: [...prev.advisor_specialties, newSpecialty.trim()] }))
+                                setFormData(prev => ({ ...prev, specialties: [...prev.specialties, newSpecialty.trim()] }))
                                 setNewSpecialty('')
                               }
                             }
@@ -400,7 +425,7 @@ export default function AdvisorOnboardingPage() {
                         />
                         <Button type="button" variant="outline" onClick={() => {
                           if (newSpecialty.trim()) {
-                            setFormData(prev => ({ ...prev, advisor_specialties: [...prev.advisor_specialties, newSpecialty.trim()] }))
+                            setFormData(prev => ({ ...prev, specialties: [...prev.specialties, newSpecialty.trim()] }))
                             setNewSpecialty('')
                           }
                         }}><Plus className="w-4 h-4" /></Button>
@@ -423,8 +448,8 @@ export default function AdvisorOnboardingPage() {
                     <Label>Profile Image URL</Label>
                     <Input
                       type="url"
-                      value={formData.advisor_image_url}
-                      onChange={e => handleChange('advisor_image_url', e.target.value)}
+                      value={formData.image_url}
+                      onChange={e => handleChange('image_url', e.target.value)}
                       placeholder="https://example.com/photo.jpg"
                     />
                     <p className="text-xs text-slate-500 mt-1">Professional headshot recommended</p>
@@ -433,8 +458,8 @@ export default function AdvisorOnboardingPage() {
                     <Label>Introduction Video URL</Label>
                     <Input
                       type="url"
-                      value={formData.advisor_video_url}
-                      onChange={e => handleChange('advisor_video_url', e.target.value)}
+                      value={formData.video_url}
+                      onChange={e => handleChange('video_url', e.target.value)}
                       placeholder="https://youtube.com/watch?v=..."
                     />
                   </div>
@@ -442,16 +467,16 @@ export default function AdvisorOnboardingPage() {
                     <Label>Blog or Website URL</Label>
                     <Input
                       type="url"
-                      value={formData.advisor_blog_url}
-                      onChange={e => handleChange('advisor_blog_url', e.target.value)}
+                      value={formData.blog_url}
+                      onChange={e => handleChange('blog_url', e.target.value)}
                       placeholder="https://example.com/blog"
                     />
                   </div>
                   <div>
                     <Label>Calendar Booking Embed Code *</Label>
                     <Textarea
-                      value={formData.advisor_calendar_embed_code}
-                      onChange={e => handleChange('advisor_calendar_embed_code', e.target.value)}
+                      value={formData.calendar_embed_code}
+                      onChange={e => handleChange('calendar_embed_code', e.target.value)}
                       placeholder="Paste your GHL calendar iframe embed code or booking URL"
                       rows={4}
                       required
@@ -474,14 +499,14 @@ export default function AdvisorOnboardingPage() {
                   <h3 className="text-2xl font-semibold text-slate-900 border-b pb-2">Client Testimonials (Optional)</h3>
                   <p className="text-slate-600">Add testimonials from satisfied clients to build trust with prospects</p>
 
-                  {formData.advisor_testimonials.map((t, i) => (
+                  {formData.testimonials.map((t, i) => (
                     <div key={i} className="flex items-start gap-2 p-4 border rounded-lg bg-slate-50">
                       <div className="flex-1 space-y-1">
                         <p className="text-sm italic text-slate-700">&ldquo;{t.quote}&rdquo;</p>
                         <p className="text-sm font-medium text-slate-900">&mdash; {t.author}</p>
                       </div>
                       <Button type="button" variant="outline" size="sm" onClick={() => {
-                        setFormData(prev => ({ ...prev, advisor_testimonials: prev.advisor_testimonials.filter((_, idx) => idx !== i) }))
+                        setFormData(prev => ({ ...prev, testimonials: prev.testimonials.filter((_, idx) => idx !== i) }))
                       }}><X className="w-4 h-4" /></Button>
                     </div>
                   ))}
@@ -501,7 +526,7 @@ export default function AdvisorOnboardingPage() {
                     />
                     <Button type="button" variant="outline" onClick={() => {
                       if (newTestimonial.quote.trim() && newTestimonial.author.trim()) {
-                        setFormData(prev => ({ ...prev, advisor_testimonials: [...prev.advisor_testimonials, newTestimonial] }))
+                        setFormData(prev => ({ ...prev, testimonials: [...prev.testimonials, newTestimonial] }))
                         setNewTestimonial({ quote: '', author: '' })
                       }
                     }} className="self-end">
@@ -513,7 +538,7 @@ export default function AdvisorOnboardingPage() {
                     <Button type="button" onClick={() => setStep(3)} variant="outline" className="flex-1">Back</Button>
                     <Button
                       type="submit"
-                      disabled={isSubmitting || !formData.full_name || !formData.advisor_title || !formData.phone || !formData.advisor_bio || !formData.advisor_calendar_embed_code}
+                      disabled={isSubmitting || !formData.name || !formData.title || !formData.phone || !formData.bio || !formData.calendar_embed_code}
                       className="flex-1 bg-brand-navy hover:bg-brand-navy-light text-brand-gold"
                     >
                       {isSubmitting ? (
