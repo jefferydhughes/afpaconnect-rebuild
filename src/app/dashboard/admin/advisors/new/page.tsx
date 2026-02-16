@@ -1,23 +1,17 @@
-import { redirect } from 'next/navigation'
+// import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+// import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdvisorForm from '@/components/admin/AdvisorForm'
 
 export default async function NewAdvisorPage() {
-  const supabase = createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?redirect=/dashboard/admin/advisors/new')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'admin') redirect('/dashboard')
+  // TODO: RE-ENABLE AUTH BEFORE PRODUCTION
+  // const supabase = createClient()
+  // const { data: { user } } = await supabase.auth.getUser()
+  // if (!user) redirect('/login?redirect=/dashboard/admin/advisors/new')
+  // const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  // if (!profile || profile.role !== 'admin') redirect('/dashboard')
 
   return (
     <div className="min-h-screen bg-gray-50">

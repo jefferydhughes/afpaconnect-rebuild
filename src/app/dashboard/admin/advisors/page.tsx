@@ -14,14 +14,13 @@ async function getAdvisors(search?: string, page = 1) {
   const to = from + pageSize - 1
 
   let query = supabase
-    .from('profiles')
+    .from('advisor')
     .select('*', { count: 'exact' })
-    .eq('role', 'advisor')
-    .order('advisor_display_order', { ascending: true, nullsFirst: false })
-    .order('full_name', { ascending: true })
+    .order('display_order', { ascending: true, nullsFirst: false })
+    .order('name', { ascending: true })
     .range(from, to)
 
-  if (search) query = query.ilike('full_name', `%${search}%`)
+  if (search) query = query.ilike('name', `%${search}%`)
 
   const { data, count } = await query
   return { advisors: data || [], total: count || 0, pageSize }
@@ -95,28 +94,28 @@ export default async function AdminAdvisorsPage({
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-brand-cream flex items-center justify-center overflow-hidden flex-shrink-0 border">
-                          {advisor.advisor_image_url ? (
+                          {advisor.image_url ? (
                             <img
-                              src={advisor.advisor_image_url}
-                              alt={advisor.full_name || ''}
+                              src={advisor.image_url}
+                              alt={advisor.name || ''}
                               className="h-10 w-10 rounded-full object-cover"
                             />
                           ) : (
                             <span className="font-semibold text-brand-navy text-sm">
-                              {advisor.full_name?.[0] || advisor.email?.[0]?.toUpperCase() || 'A'}
+                              {advisor.name?.[0] || advisor.email?.[0]?.toUpperCase() || 'A'}
                             </span>
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900 text-sm">{advisor.full_name || 'Unnamed Advisor'}</p>
-                          {advisor.advisor_years_experience && (
-                            <p className="text-xs text-gray-400">{advisor.advisor_years_experience} years experience</p>
+                          <p className="font-medium text-gray-900 text-sm">{advisor.name || 'Unnamed Advisor'}</p>
+                          {advisor.years_experience && (
+                            <p className="text-xs text-gray-400">{advisor.years_experience} years experience</p>
                           )}
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-4 hidden md:table-cell">
-                      <span className="text-sm text-gray-700">{advisor.advisor_title || '—'}</span>
+                      <span className="text-sm text-gray-700">{advisor.title || '—'}</span>
                     </td>
                     <td className="py-3 px-4 hidden lg:table-cell">
                       <div className="space-y-0.5">
@@ -135,11 +134,11 @@ export default async function AdminAdvisorsPage({
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <Badge className={advisor.advisor_is_active
+                      <Badge className={advisor.is_active
                         ? 'bg-green-100 text-green-700 border-0 text-xs'
                         : 'bg-gray-100 text-gray-500 border-0 text-xs'
                       }>
-                        {advisor.advisor_is_active ? 'Active' : 'Inactive'}
+                        {advisor.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </td>
                     <td className="py-3 px-4">
@@ -150,7 +149,7 @@ export default async function AdminAdvisorsPage({
                             Edit
                           </Button>
                         </Link>
-                        <DeleteAdvisorButton id={advisor.id} name={advisor.full_name || 'Advisor'} />
+                        <DeleteAdvisorButton id={advisor.id} name={advisor.name || 'Advisor'} />
                       </div>
                     </td>
                   </tr>

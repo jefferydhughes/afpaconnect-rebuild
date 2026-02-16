@@ -394,6 +394,92 @@ export interface Database {
           created_at?: string
         }
       }
+      advisor: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          created_by: string | null
+          name: string | null
+          title: string | null
+          email: string | null
+          phone: string | null
+          bio: string | null
+          image_url: string | null
+          video_url: string | null
+          calendar_embed_code: string | null
+          blog_url: string | null
+          personal_quote: string | null
+          testimonials: { quote: string; author: string }[] | null
+          credentials: string[] | null
+          specialties: string[] | null
+          linkedin: string | null
+          years_experience: number | null
+          is_active: boolean | null
+          is_leadership: boolean | null
+          display_order: number | null
+          city: string | null
+          state: string | null
+          latitude: number | null
+          longitude: number | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          name?: string | null
+          title?: string | null
+          email?: string | null
+          phone?: string | null
+          bio?: string | null
+          image_url?: string | null
+          video_url?: string | null
+          calendar_embed_code?: string | null
+          blog_url?: string | null
+          personal_quote?: string | null
+          testimonials?: { quote: string; author: string }[] | null
+          credentials?: string[] | null
+          specialties?: string[] | null
+          linkedin?: string | null
+          years_experience?: number | null
+          is_active?: boolean | null
+          is_leadership?: boolean | null
+          display_order?: number | null
+          city?: string | null
+          state?: string | null
+          latitude?: number | null
+          longitude?: number | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          name?: string | null
+          title?: string | null
+          email?: string | null
+          phone?: string | null
+          bio?: string | null
+          image_url?: string | null
+          video_url?: string | null
+          calendar_embed_code?: string | null
+          blog_url?: string | null
+          personal_quote?: string | null
+          testimonials?: { quote: string; author: string }[] | null
+          credentials?: string[] | null
+          specialties?: string[] | null
+          linkedin?: string | null
+          years_experience?: number | null
+          is_active?: boolean | null
+          is_leadership?: boolean | null
+          display_order?: number | null
+          city?: string | null
+          state?: string | null
+          latitude?: number | null
+          longitude?: number | null
+        }
+      }
       advisor_applications: {
         Row: {
           id: string
@@ -532,4 +618,5 @@ export type BusinessModel = NonNullable<Franchise['business_model']>
 export type TimeCommitment = NonNullable<Franchise['time_commitment']>
 export type ExperienceLevel = NonNullable<QuizResult['experience_level']>
 export type LeadStatus = Lead['status']
+export type Advisor = Database['public']['Tables']['advisor']['Row']
 export type AdvisorApplication = Database['public']['Tables']['advisor_applications']['Row']

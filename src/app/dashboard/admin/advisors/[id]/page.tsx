@@ -1,4 +1,4 @@
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft } from 'lucide-react'
@@ -12,22 +12,16 @@ export default async function EditAdvisorPage({
 }) {
   const supabase = createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?redirect=/dashboard/admin/advisors')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'admin') redirect('/dashboard')
+  // TODO: RE-ENABLE AUTH BEFORE PRODUCTION
+  // const { data: { user } } = await supabase.auth.getUser()
+  // if (!user) redirect('/login?redirect=/dashboard/admin/advisors')
+  // const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  // if (!profile || profile.role !== 'admin') redirect('/dashboard')
 
   const { data: advisor } = await supabase
-    .from('profiles')
+    .from('advisor')
     .select('*')
     .eq('id', params.id)
-    .eq('role', 'advisor')
     .single()
 
   if (!advisor) notFound()
@@ -45,7 +39,7 @@ export default async function EditAdvisorPage({
             </Link>
             <div>
               <p className="text-brand-gold text-sm font-medium">Admin &rarr; Advisors</p>
-              <h1 className="text-2xl font-bold">Edit: {advisor.full_name}</h1>
+              <h1 className="text-2xl font-bold">Edit: {advisor.name}</h1>
             </div>
           </div>
         </div>

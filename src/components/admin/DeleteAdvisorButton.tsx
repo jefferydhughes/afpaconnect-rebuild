@@ -20,17 +20,13 @@ export default function DeleteAdvisorButton({
   async function handleDelete() {
     setDeleting(true)
     const supabase = createClient()
-    // Deactivate advisor instead of deleting (profile is tied to auth)
-    const { error } = await supabase
-      .from('profiles')
-      .update({ role: 'user', advisor_is_active: false })
-      .eq('id', id)
+    const { error } = await supabase.from('advisor').delete().eq('id', id)
     if (error) {
-      toast.error('Failed to remove advisor: ' + error.message)
+      toast.error('Failed to delete: ' + error.message)
       setDeleting(false)
       setConfirming(false)
     } else {
-      toast.success(`"${name}" removed from advisors.`)
+      toast.success(`"${name}" deleted.`)
       router.refresh()
     }
   }

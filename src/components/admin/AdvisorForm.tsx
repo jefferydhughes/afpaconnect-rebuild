@@ -43,41 +43,38 @@ type Tab = typeof TABS[number]
 
 type AdvisorData = {
   id?: string
-  full_name: string
+  name: string
   email: string
   phone: string | null
-  advisor_slug: string | null
-  advisor_title: string | null
-  advisor_bio: string | null
-  advisor_image_url: string | null
-  advisor_video_url: string | null
-  advisor_calendar_url: string | null
-  advisor_calendar_embed_code: string | null
-  advisor_blog_url: string | null
-  advisor_linkedin: string | null
-  advisor_personal_quote: string | null
-  advisor_testimonials: { quote: string; author: string }[] | null
-  advisor_credentials: string[] | null
-  advisor_specialties: string[] | null
-  advisor_years_experience: number | null
-  advisor_city: string | null
-  advisor_state: string | null
-  advisor_display_order: number | null
-  advisor_is_active: boolean
+  title: string | null
+  bio: string | null
+  image_url: string | null
+  video_url: string | null
+  calendar_embed_code: string | null
+  blog_url: string | null
+  linkedin: string | null
+  personal_quote: string | null
+  testimonials: { quote: string; author: string }[] | null
+  credentials: string[] | null
+  specialties: string[] | null
+  years_experience: number | null
+  city: string | null
+  state: string | null
+  display_order: number | null
+  is_active: boolean
+  is_leadership: boolean
+  latitude: number | null
+  longitude: number | null
 }
 
 const empty: AdvisorData = {
-  full_name: '', email: '', phone: null, advisor_slug: null, advisor_title: null,
-  advisor_bio: null, advisor_image_url: null, advisor_video_url: null,
-  advisor_calendar_url: null, advisor_calendar_embed_code: null,
-  advisor_blog_url: null, advisor_linkedin: null, advisor_personal_quote: null,
-  advisor_testimonials: [], advisor_credentials: [], advisor_specialties: [],
-  advisor_years_experience: null, advisor_city: null, advisor_state: null,
-  advisor_display_order: null, advisor_is_active: true,
-}
-
-function slugify(name: string) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  name: '', email: '', phone: null, title: null,
+  bio: null, image_url: null, video_url: null,
+  calendar_embed_code: null, blog_url: null, linkedin: null,
+  personal_quote: null, testimonials: [], credentials: [],
+  specialties: [], years_experience: null, city: null,
+  state: null, display_order: null, is_active: true,
+  is_leadership: false, latitude: null, longitude: null,
 }
 
 export default function AdvisorForm({ advisor }: { advisor?: any }) {
@@ -87,39 +84,39 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
   const [tab, setTab] = useState<Tab>('Basic Info')
   const [saving, setSaving] = useState(false)
   const [showCustomTitle, setShowCustomTitle] = useState(
-    advisor?.advisor_title && !TITLE_OPTIONS.includes(advisor.advisor_title)
+    advisor?.title && !TITLE_OPTIONS.includes(advisor.title)
   )
   const [data, setData] = useState<AdvisorData>(() => {
     if (advisor) {
       return {
         id: advisor.id,
-        full_name: advisor.full_name || '',
+        name: advisor.name || '',
         email: advisor.email || '',
         phone: advisor.phone || null,
-        advisor_slug: advisor.advisor_slug || null,
-        advisor_title: advisor.advisor_title || null,
-        advisor_bio: advisor.advisor_bio || null,
-        advisor_image_url: advisor.advisor_image_url || null,
-        advisor_video_url: advisor.advisor_video_url || null,
-        advisor_calendar_url: advisor.advisor_calendar_url || null,
-        advisor_calendar_embed_code: advisor.advisor_calendar_embed_code || null,
-        advisor_blog_url: advisor.advisor_blog_url || null,
-        advisor_linkedin: advisor.advisor_linkedin || null,
-        advisor_personal_quote: advisor.advisor_personal_quote || null,
-        advisor_testimonials: advisor.advisor_testimonials || [],
-        advisor_credentials: advisor.advisor_credentials || [],
-        advisor_specialties: advisor.advisor_specialties || [],
-        advisor_years_experience: advisor.advisor_years_experience || null,
-        advisor_city: advisor.advisor_city || null,
-        advisor_state: advisor.advisor_state || null,
-        advisor_display_order: advisor.advisor_display_order || null,
-        advisor_is_active: advisor.advisor_is_active ?? true,
+        title: advisor.title || null,
+        bio: advisor.bio || null,
+        image_url: advisor.image_url || null,
+        video_url: advisor.video_url || null,
+        calendar_embed_code: advisor.calendar_embed_code || null,
+        blog_url: advisor.blog_url || null,
+        linkedin: advisor.linkedin || null,
+        personal_quote: advisor.personal_quote || null,
+        testimonials: advisor.testimonials || [],
+        credentials: advisor.credentials || [],
+        specialties: advisor.specialties || [],
+        years_experience: advisor.years_experience || null,
+        city: advisor.city || null,
+        state: advisor.state || null,
+        display_order: advisor.display_order || null,
+        is_active: advisor.is_active ?? true,
+        is_leadership: advisor.is_leadership ?? false,
+        latitude: advisor.latitude || null,
+        longitude: advisor.longitude || null,
       }
     }
     return empty
   })
 
-  // Dynamic list helpers
   const [newCredential, setNewCredential] = useState('')
   const [newSpecialty, setNewSpecialty] = useState('')
   const [newTestimonial, setNewTestimonial] = useState({ quote: '', author: '' })
@@ -129,96 +126,91 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
   }
 
   function numOrNull(v: string) {
-    const n = parseInt(v)
+    const n = parseFloat(v)
     return isNaN(n) ? null : n
   }
 
   function handleTitleChange(value: string) {
     if (value === 'custom') {
       setShowCustomTitle(true)
-      set('advisor_title', '')
+      set('title', '')
     } else {
       setShowCustomTitle(false)
-      set('advisor_title', value)
+      set('title', value)
     }
   }
 
   function addCredential() {
     if (newCredential.trim()) {
-      set('advisor_credentials', [...(data.advisor_credentials || []), newCredential.trim()])
+      set('credentials', [...(data.credentials || []), newCredential.trim()])
       setNewCredential('')
     }
   }
 
   function removeCredential(index: number) {
-    set('advisor_credentials', (data.advisor_credentials || []).filter((_, i) => i !== index))
+    set('credentials', (data.credentials || []).filter((_, i) => i !== index))
   }
 
   function addSpecialty() {
     if (newSpecialty.trim()) {
-      set('advisor_specialties', [...(data.advisor_specialties || []), newSpecialty.trim()])
+      set('specialties', [...(data.specialties || []), newSpecialty.trim()])
       setNewSpecialty('')
     }
   }
 
   function removeSpecialty(index: number) {
-    set('advisor_specialties', (data.advisor_specialties || []).filter((_, i) => i !== index))
+    set('specialties', (data.specialties || []).filter((_, i) => i !== index))
   }
 
   function addTestimonial() {
     if (newTestimonial.quote.trim() && newTestimonial.author.trim()) {
-      set('advisor_testimonials', [...(data.advisor_testimonials || []), newTestimonial])
+      set('testimonials', [...(data.testimonials || []), newTestimonial])
       setNewTestimonial({ quote: '', author: '' })
     }
   }
 
   function removeTestimonial(index: number) {
-    set('advisor_testimonials', (data.advisor_testimonials || []).filter((_, i) => i !== index))
+    set('testimonials', (data.testimonials || []).filter((_, i) => i !== index))
   }
 
   async function handleSave() {
-    if (!data.full_name.trim()) { toast.error('Full name is required'); return }
+    if (!data.name.trim()) { toast.error('Name is required'); return }
     if (!data.email.trim()) { toast.error('Email is required'); return }
 
     setSaving(true)
     try {
-      // Build the update payload (only advisor-related + name/phone fields)
       const payload = {
-        full_name: data.full_name,
+        name: data.name,
+        email: data.email,
         phone: data.phone,
-        advisor_slug: data.advisor_slug || slugify(data.full_name),
-        advisor_title: data.advisor_title,
-        advisor_bio: data.advisor_bio,
-        advisor_image_url: data.advisor_image_url,
-        advisor_video_url: data.advisor_video_url,
-        advisor_calendar_url: data.advisor_calendar_url,
-        advisor_calendar_embed_code: data.advisor_calendar_embed_code,
-        advisor_blog_url: data.advisor_blog_url,
-        advisor_linkedin: data.advisor_linkedin,
-        advisor_personal_quote: data.advisor_personal_quote,
-        advisor_testimonials: data.advisor_testimonials,
-        advisor_credentials: data.advisor_credentials,
-        advisor_specialties: data.advisor_specialties,
-        advisor_years_experience: data.advisor_years_experience,
-        advisor_city: data.advisor_city,
-        advisor_state: data.advisor_state,
-        advisor_display_order: data.advisor_display_order,
-        advisor_is_active: data.advisor_is_active,
+        title: data.title,
+        bio: data.bio,
+        image_url: data.image_url,
+        video_url: data.video_url,
+        calendar_embed_code: data.calendar_embed_code,
+        blog_url: data.blog_url,
+        linkedin: data.linkedin,
+        personal_quote: data.personal_quote,
+        testimonials: data.testimonials,
+        credentials: data.credentials,
+        specialties: data.specialties,
+        years_experience: data.years_experience,
+        city: data.city,
+        state: data.state,
+        display_order: data.display_order,
+        is_active: data.is_active,
+        is_leadership: data.is_leadership,
+        latitude: data.latitude,
+        longitude: data.longitude,
       }
 
       if (isNew) {
-        // Call API route to create auth user + profile
-        const res = await fetch('/api/admin/create-advisor', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: data.email, ...payload }),
-        })
-        const result = await res.json()
-        if (!res.ok) throw new Error(result.error || 'Failed to create advisor')
+        const { error } = await supabase.from('advisor').insert(payload)
+        if (error) throw error
         toast.success('Advisor created!')
       } else {
         const { error } = await supabase
-          .from('profiles')
+          .from('advisor')
           .update(payload)
           .eq('id', advisor!.id)
         if (error) throw error
@@ -259,11 +251,8 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
             <div>
               <Label>Full Name *</Label>
               <Input
-                value={data.full_name}
-                onChange={e => {
-                  set('full_name', e.target.value)
-                  if (isNew) set('advisor_slug', slugify(e.target.value))
-                }}
+                value={data.name}
+                onChange={e => set('name', e.target.value)}
                 placeholder="e.g. Lauren Malik"
               />
             </div>
@@ -274,9 +263,7 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
                 value={data.email}
                 onChange={e => set('email', e.target.value)}
                 placeholder="advisor@example.com"
-                disabled={!isNew}
               />
-              {!isNew && <p className="text-xs text-gray-400 mt-1">Email cannot be changed after creation.</p>}
             </div>
           </div>
 
@@ -284,7 +271,7 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
             <div>
               <Label>Title *</Label>
               <select
-                value={showCustomTitle ? 'custom' : (data.advisor_title || '')}
+                value={showCustomTitle ? 'custom' : (data.title || '')}
                 onChange={e => handleTitleChange(e.target.value)}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy"
               >
@@ -298,8 +285,8 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
                 <Input
                   className="mt-2"
                   placeholder="Enter custom title"
-                  value={data.advisor_title || ''}
-                  onChange={e => set('advisor_title', e.target.value)}
+                  value={data.title || ''}
+                  onChange={e => set('title', e.target.value)}
                 />
               )}
             </div>
@@ -318,8 +305,8 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
               <Label>Years of Experience</Label>
               <Input
                 type="number"
-                value={data.advisor_years_experience ?? ''}
-                onChange={e => set('advisor_years_experience', numOrNull(e.target.value))}
+                value={data.years_experience ?? ''}
+                onChange={e => set('years_experience', numOrNull(e.target.value))}
                 placeholder="e.g. 5"
               />
             </div>
@@ -327,8 +314,8 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
               <Label>Display Order</Label>
               <Input
                 type="number"
-                value={data.advisor_display_order ?? ''}
-                onChange={e => set('advisor_display_order', numOrNull(e.target.value))}
+                value={data.display_order ?? ''}
+                onChange={e => set('display_order', numOrNull(e.target.value))}
                 placeholder="e.g. 1"
               />
               <p className="text-xs text-gray-400 mt-1">Lower numbers appear first in the directory.</p>
@@ -339,16 +326,16 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
             <div>
               <Label>City</Label>
               <Input
-                value={data.advisor_city || ''}
-                onChange={e => set('advisor_city', e.target.value || null)}
+                value={data.city || ''}
+                onChange={e => set('city', e.target.value || null)}
                 placeholder="e.g. Dallas"
               />
             </div>
             <div>
               <Label>State</Label>
               <select
-                value={data.advisor_state || ''}
-                onChange={e => set('advisor_state', e.target.value || null)}
+                value={data.state || ''}
+                onChange={e => set('state', e.target.value || null)}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy"
               >
                 <option value="">Select state</option>
@@ -359,20 +346,37 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
             </div>
           </div>
 
-          <div>
-            <Label>URL Slug</Label>
-            <Input
-              value={data.advisor_slug || ''}
-              onChange={e => set('advisor_slug', slugify(e.target.value))}
-              placeholder="e.g. lauren-malik"
-            />
-            <p className="text-xs text-gray-400 mt-1">Used in the URL: /advisors/<strong>{data.advisor_slug || 'slug'}</strong></p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <Label>Latitude</Label>
+              <Input
+                type="number"
+                step="any"
+                value={data.latitude ?? ''}
+                onChange={e => set('latitude', numOrNull(e.target.value))}
+                placeholder="e.g. 32.7767"
+              />
+            </div>
+            <div>
+              <Label>Longitude</Label>
+              <Input
+                type="number"
+                step="any"
+                value={data.longitude ?? ''}
+                onChange={e => set('longitude', numOrNull(e.target.value))}
+                placeholder="e.g. -96.7970"
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-8 pt-2">
             <div className="flex items-center gap-3">
-              <Switch checked={data.advisor_is_active} onCheckedChange={v => set('advisor_is_active', v)} />
+              <Switch checked={data.is_active} onCheckedChange={v => set('is_active', v)} />
               <Label>Active (visible in directory)</Label>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={data.is_leadership} onCheckedChange={v => set('is_leadership', v)} />
+              <Label>Leadership team member</Label>
             </div>
           </div>
         </div>
@@ -385,53 +389,40 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
             <Label>Profile Image URL</Label>
             <Input
               type="url"
-              value={data.advisor_image_url || ''}
-              onChange={e => set('advisor_image_url', e.target.value || null)}
+              value={data.image_url || ''}
+              onChange={e => set('image_url', e.target.value || null)}
               placeholder="https://example.com/photo.jpg"
             />
-            <p className="text-xs text-gray-400 mt-1">Professional headshot recommended.</p>
           </div>
 
           <div>
             <Label>Introduction Video URL</Label>
             <Input
               type="url"
-              value={data.advisor_video_url || ''}
-              onChange={e => set('advisor_video_url', e.target.value || null)}
+              value={data.video_url || ''}
+              onChange={e => set('video_url', e.target.value || null)}
               placeholder="https://youtube.com/watch?v=..."
             />
             <p className="text-xs text-gray-400 mt-1">MP4 video URL for the advisor&apos;s introduction video.</p>
           </div>
 
           <div>
-            <Label>Calendar URL</Label>
-            <Input
-              type="url"
-              value={data.advisor_calendar_url || ''}
-              onChange={e => set('advisor_calendar_url', e.target.value || null)}
-              placeholder="https://calendly.com/advisor-name"
-            />
-            <p className="text-xs text-gray-400 mt-1">Direct booking link (Calendly, GHL, etc.).</p>
-          </div>
-
-          <div>
             <Label>Calendar Embed Code (GHL or Calendly)</Label>
             <Textarea
               rows={4}
-              value={data.advisor_calendar_embed_code || ''}
-              onChange={e => set('advisor_calendar_embed_code', e.target.value || null)}
+              value={data.calendar_embed_code || ''}
+              onChange={e => set('calendar_embed_code', e.target.value || null)}
               placeholder="Paste your calendar embed code here"
               className="font-mono text-sm"
             />
-            <p className="text-xs text-gray-400 mt-1">Supports GHL iframe embeds or Calendly inline widget code.</p>
           </div>
 
           <div>
             <Label>Blog URL</Label>
             <Input
               type="url"
-              value={data.advisor_blog_url || ''}
-              onChange={e => set('advisor_blog_url', e.target.value || null)}
+              value={data.blog_url || ''}
+              onChange={e => set('blog_url', e.target.value || null)}
               placeholder="https://example.com/blog"
             />
           </div>
@@ -440,8 +431,8 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
             <Label>LinkedIn Profile URL</Label>
             <Input
               type="url"
-              value={data.advisor_linkedin || ''}
-              onChange={e => set('advisor_linkedin', e.target.value || null)}
+              value={data.linkedin || ''}
+              onChange={e => set('linkedin', e.target.value || null)}
               placeholder="https://linkedin.com/in/username"
             />
           </div>
@@ -455,8 +446,8 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
             <Label>Professional Biography</Label>
             <Textarea
               rows={6}
-              value={data.advisor_bio || ''}
-              onChange={e => set('advisor_bio', e.target.value || null)}
+              value={data.bio || ''}
+              onChange={e => set('bio', e.target.value || null)}
               placeholder="Share the advisor's professional background, expertise, and passion for helping franchisees..."
             />
           </div>
@@ -465,8 +456,8 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
             <Label>Personal Quote</Label>
             <Textarea
               rows={3}
-              value={data.advisor_personal_quote || ''}
-              onChange={e => set('advisor_personal_quote', e.target.value || null)}
+              value={data.personal_quote || ''}
+              onChange={e => set('personal_quote', e.target.value || null)}
               placeholder="A short, impactful quote that represents their philosophy..."
             />
           </div>
@@ -474,7 +465,7 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
           <div>
             <Label>Professional Credentials</Label>
             <div className="space-y-2 mt-1">
-              {(data.advisor_credentials || []).map((cred, index) => (
+              {(data.credentials || []).map((cred, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input value={cred} disabled className="flex-1 bg-slate-50" />
                   <Button type="button" variant="outline" size="sm" onClick={() => removeCredential(index)}>
@@ -499,7 +490,7 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
           <div>
             <Label>Areas of Expertise</Label>
             <div className="space-y-2 mt-1">
-              {(data.advisor_specialties || []).map((spec, index) => (
+              {(data.specialties || []).map((spec, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input value={spec} disabled className="flex-1 bg-slate-50" />
                   <Button type="button" variant="outline" size="sm" onClick={() => removeSpecialty(index)}>
@@ -528,7 +519,7 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
         <div className="space-y-5">
           <p className="text-gray-600">Add testimonials from satisfied clients to build trust with prospects.</p>
 
-          {(data.advisor_testimonials || []).map((testimonial, index) => (
+          {(data.testimonials || []).map((testimonial, index) => (
             <div key={index} className="flex items-start gap-2 p-4 border rounded-lg bg-slate-50">
               <div className="flex-1 space-y-1">
                 <p className="text-sm italic text-slate-700">&ldquo;{testimonial.quote}&rdquo;</p>
