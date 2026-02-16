@@ -186,7 +186,7 @@ export default function AboutPage() {
                   Expert Advisor Network
                 </h3>
                 <p className="text-gray-600">
-                  Connect with certified franchise consultants who provide personalized 
+                  Connect with certified franchise advisors who provide personalized 
                   guidance throughout your franchise journey—completely free of charge.
                 </p>
               </div>

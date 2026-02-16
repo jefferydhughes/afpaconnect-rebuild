@@ -46,7 +46,7 @@ export default async function AdvisorsPage() {
               Find Your Franchise Advisor
             </h1>
             <p className="text-xl text-gray-300 mb-6">
-              Connect with certified franchise consultants who understand your goals 
+              Connect with certified franchise advisors who understand your goals 
               and can guide you to the perfect franchise opportunity.
             </p>
             <div className="flex flex-wrap gap-4">
@@ -111,7 +111,7 @@ export default async function AdvisorsPage() {
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Our Advisors</h2>
             <p className="text-gray-600">
-              {advisors.length} certified franchise consultants ready to help
+              {advisors.length} certified franchise advisors ready to help
             </p>
           </div>
           <Link href="/quiz">

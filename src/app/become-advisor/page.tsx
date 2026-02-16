@@ -7,11 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowRight, Building2, Check, Shield, Users, Globe, Mail, Phone } from 'lucide-react'
-
-export const metadata = {
-  title: 'Become a Franchise Advisor | AFPA Connect',
-  description: 'Join our network of certified franchise consultants and help entrepreneurs find their dream business.',
-}
+import { createClient } from '@/lib/supabase/client'
 
 const benefits = [
   {
@@ -61,9 +57,25 @@ export default function BecomeAdvisorPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.from('advisor_applications').insert({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone || null,
+        company: formData.company || null,
+        license_number: formData.licenseNumber || null,
+        message: formData.message || null,
+      })
+      if (error) throw error
+      setIsSubmitted(true)
+    } catch (err) {
+      console.error('Error submitting application:', err)
+      alert('Failed to submit application. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -80,7 +92,7 @@ export default function BecomeAdvisorPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Become a Franchise Advisor</h1>
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8">
-            Join our network of certified franchise consultants and help entrepreneurs find their dream business.
+            Join our network of certified franchise advisors and help entrepreneurs find their dream business.
           </p>
           <Link href="#apply">
             <Button className="bg-brand-gold text-brand-navy hover:bg-brand-gold-light px-8 py-3 text-lg">

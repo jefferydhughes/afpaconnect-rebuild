@@ -24,6 +24,17 @@ export interface Database {
           advisor_calendar_url: string | null
           advisor_specialties: string[] | null
           advisor_is_active: boolean
+          advisor_video_url: string | null
+          advisor_blog_url: string | null
+          advisor_linkedin: string | null
+          advisor_personal_quote: string | null
+          advisor_testimonials: { quote: string; author: string }[] | null
+          advisor_credentials: string[] | null
+          advisor_years_experience: number | null
+          advisor_city: string | null
+          advisor_state: string | null
+          advisor_display_order: number | null
+          advisor_calendar_embed_code: string | null
           associated_franchise_id: string | null
           created_at: string
           updated_at: string
@@ -42,6 +53,17 @@ export interface Database {
           advisor_calendar_url?: string | null
           advisor_specialties?: string[] | null
           advisor_is_active?: boolean
+          advisor_video_url?: string | null
+          advisor_blog_url?: string | null
+          advisor_linkedin?: string | null
+          advisor_personal_quote?: string | null
+          advisor_testimonials?: { quote: string; author: string }[] | null
+          advisor_credentials?: string[] | null
+          advisor_years_experience?: number | null
+          advisor_city?: string | null
+          advisor_state?: string | null
+          advisor_display_order?: number | null
+          advisor_calendar_embed_code?: string | null
           associated_franchise_id?: string | null
           created_at?: string
           updated_at?: string
@@ -60,6 +82,17 @@ export interface Database {
           advisor_calendar_url?: string | null
           advisor_specialties?: string[] | null
           advisor_is_active?: boolean
+          advisor_video_url?: string | null
+          advisor_blog_url?: string | null
+          advisor_linkedin?: string | null
+          advisor_personal_quote?: string | null
+          advisor_testimonials?: { quote: string; author: string }[] | null
+          advisor_credentials?: string[] | null
+          advisor_years_experience?: number | null
+          advisor_city?: string | null
+          advisor_state?: string | null
+          advisor_display_order?: number | null
+          advisor_calendar_embed_code?: string | null
           associated_franchise_id?: string | null
           created_at?: string
           updated_at?: string
@@ -361,6 +394,50 @@ export interface Database {
           created_at?: string
         }
       }
+      advisor_applications: {
+        Row: {
+          id: string
+          first_name: string
+          last_name: string
+          email: string
+          phone: string | null
+          company: string | null
+          license_number: string | null
+          message: string | null
+          status: 'pending' | 'approved' | 'rejected'
+          reviewed_at: string | null
+          reviewed_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          first_name: string
+          last_name: string
+          email: string
+          phone?: string | null
+          company?: string | null
+          license_number?: string | null
+          message?: string | null
+          status?: 'pending' | 'approved' | 'rejected'
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          first_name?: string
+          last_name?: string
+          email?: string
+          phone?: string | null
+          company?: string | null
+          license_number?: string | null
+          message?: string | null
+          status?: 'pending' | 'approved' | 'rejected'
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          created_at?: string
+        }
+      }
       blog_posts: {
         Row: {
           id: string
@@ -455,3 +532,4 @@ export type BusinessModel = NonNullable<Franchise['business_model']>
 export type TimeCommitment = NonNullable<Franchise['time_commitment']>
 export type ExperienceLevel = NonNullable<QuizResult['experience_level']>
 export type LeadStatus = Lead['status']
+export type AdvisorApplication = Database['public']['Tables']['advisor_applications']['Row']

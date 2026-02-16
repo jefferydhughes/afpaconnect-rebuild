@@ -249,7 +249,7 @@ export default function PricingPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Franchise Advisor Plans</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive tools for franchise advisors and consultants
+              Comprehensive tools for franchise advisors
             </p>
           </div>
 

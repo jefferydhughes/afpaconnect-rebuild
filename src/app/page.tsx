@@ -29,7 +29,7 @@ const features = [
   {
     icon: Users,
     title: 'Expert Advisors',
-    description: 'Connect with certified franchise consultants for personalized guidance.',
+    description: 'Connect with certified franchise advisors for personalized guidance.',
   },
   {
     icon: Shield,
