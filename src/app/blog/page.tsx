@@ -6,6 +6,19 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
+type BlogListPost = {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  category: string | null
+  featured_image_url: string | null
+  is_featured: boolean
+  published_at: string | null
+  author_id: string | null
+  profiles: { full_name: string | null } | null
+}
+
 export const metadata = {
   title: 'Franchise Blog & Resources',
   description: 'Expert insights, tips, and guides to help you on your franchise ownership journey.',
@@ -31,7 +44,7 @@ async function getBlogPosts() {
     .eq('is_published', true)
     .order('published_at', { ascending: false })
 
-  return posts || []
+  return (posts || []) as BlogListPost[]
 }
 
 const categoryColors: Record<string, string> = {

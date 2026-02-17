@@ -7,6 +7,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
+type RelatedPost = {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  featured_image_url: string | null
+  published_at: string | null
+}
+
 async function getBlogPost(slug: string) {
   const supabase = createClient()
   
@@ -33,7 +42,7 @@ async function getBlogPost(slug: string) {
     .neq('id', post.id)
     .limit(3)
 
-  return { post, relatedPosts: relatedPosts || [] }
+  return { post, relatedPosts: (relatedPosts || []) as RelatedPost[] }
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {

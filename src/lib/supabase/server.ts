@@ -41,7 +41,7 @@ export function createClient() {
         },
       },
     }
-  )
+  ) as any
 }
 
 // Admin client for server-side operations that need to bypass RLS
@@ -68,5 +68,5 @@ export function createAdminClient() {
         persistSession: false,
       },
     }
-  )
+  ) as any
 }

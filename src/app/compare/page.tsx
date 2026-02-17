@@ -98,7 +98,7 @@ function CompareContent() {
       case "percentage": return value ? `${value}%` : "N/A"
       case "weeks": return value ? `${value} weeks` : "N/A"
       case "array": return Array.isArray(value) ? value.join(', ') : "N/A"
-      case "text": return value ? value.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : "N/A"
+      case "text": return value ? value.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) : "N/A"
       case "number": return value ? Number(value).toLocaleString() : "N/A"
       default: return value || "N/A"
     }

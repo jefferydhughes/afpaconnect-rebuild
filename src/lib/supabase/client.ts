@@ -14,5 +14,5 @@ export function createClient() {
   return createBrowserClient<SupabaseDatabase>(
     supabaseUrl,
     supabaseAnonKey
-  )
+  ) as any
 }

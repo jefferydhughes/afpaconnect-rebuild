@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import type { Advisor, Profile } from '@/types/database'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,11 +11,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: profile } = await supabase
+    const { data: profileData } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
+
+    const profile = profileData as Pick<Profile, 'role'> | null
 
     if (!profile || profile.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -30,8 +33,8 @@ export async function POST(request: NextRequest) {
     const adminClient = createAdminClient()
 
     // Insert into the advisor table
-    const { data: advisor, error: insertError } = await adminClient
-      .from('advisor')
+    const advisorTable = adminClient.from('advisor') as any
+    const { data: advisorData, error: insertError } = await advisorTable
       .insert({
         email,
         name: name || null,
@@ -41,8 +44,14 @@ export async function POST(request: NextRequest) {
       .select('id')
       .single()
 
+    const advisor = advisorData as Pick<Advisor, 'id'> | null
+
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 400 })
+    }
+
+    if (!advisor) {
+      return NextResponse.json({ error: 'Advisor creation failed' }, { status: 500 })
     }
 
     return NextResponse.json({ id: advisor.id, success: true })

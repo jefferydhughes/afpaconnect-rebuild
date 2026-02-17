@@ -544,7 +544,7 @@ async function sendUnattributedQuizNotification(payload: Record<string, any>) {
   }
 }
 
-function normalizeAdvisorId(value?: string): string | null {
+function normalizeAdvisorId(value?: string | null): string | null {
   if (!value) return null
   const trimmed = value.trim()
   if (!trimmed || trimmed === 'ACTUAL_ADVISOR_ID') return null
