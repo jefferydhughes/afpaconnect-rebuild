@@ -7,11 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Check, Building2, Users, FileText, Scale, TrendingUp, DollarSign, Star, MapPin, Phone, Mail, Calendar } from 'lucide-react'
 
-export const metadata = {
-  title: 'Finance Your Franchise | AFPA Connect',
-  description: 'Explore financing options for your franchise investment.',
-}
-
 const financingOptions = [
   {
     title: 'SBA Loans',

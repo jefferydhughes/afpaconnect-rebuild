@@ -1,9 +1,7 @@
-'use client'
-
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowRight, Check, Building2, Users, Globe, Star, MapPin, Phone, Mail, Calendar } from 'lucide-react'
+import { Building2, Users, Globe, Star } from 'lucide-react'
 
 export const metadata = {
   title: 'Leadership Team | AFPA Connect',

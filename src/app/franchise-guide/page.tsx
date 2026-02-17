@@ -9,11 +9,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowRight, Check, Building2, DollarSign, Users, TrendingUp, MapPin, Phone, Mail, Star } from 'lucide-react'
 
-export const metadata = {
-  title: 'Franchise Guide | AFPA Connect',
-  description: 'Learn everything about franchising with our comprehensive guide.',
-}
-
 const sections = [
   {
     title: 'What is a Franchise?',

@@ -7,11 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Building2, DollarSign, TrendingUp, Check, MapPin, Phone, Mail, Globe } from 'lucide-react'
 
-export const metadata = {
-  title: 'Franchise Your Business | AFPA Connect',
-  description: 'Grow your franchise brand with our comprehensive franchising solutions.',
-}
-
 const benefits = [
   {
     icon: TrendingUp,

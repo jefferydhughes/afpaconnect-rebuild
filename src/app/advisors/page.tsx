@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import type { Advisor } from '@/types/database'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -18,13 +19,14 @@ import { Badge } from '@/components/ui/badge'
 async function getAdvisors() {
   const supabase = createClient()
 
-  const { data: advisors } = await supabase
+  const { data: advisorsData } = await supabase
     .from('advisor')
     .select('*')
     .eq('is_active', true)
     .order('display_order', { ascending: true, nullsFirst: false })
     .order('name', { ascending: true })
 
+  const advisors = advisorsData as Advisor[] | null
   return advisors || []
 }
 

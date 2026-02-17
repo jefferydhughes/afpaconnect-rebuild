@@ -1,19 +1,22 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { 
-  ArrowRight, 
-  CheckCircle, 
-  Users, 
-  Building2, 
+import {
+  ArrowRight,
+  CheckCircle2,
+  Users,
+  Building2,
   TrendingUp,
   Star,
   Clock,
-  Shield
+  Shield,
+  Unlock,
+  Goal
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
+import HeroSection from '@/components/home/HeroSection'
 
 const features = [
   {
@@ -54,6 +57,30 @@ const categories = [
   { name: "Children's Services", icon: '🧒', count: 55 },
 ]
 
+const successCards = [
+  {
+    icon: Users,
+    title: 'Experience Peace of Mind',
+    description: 'Know you\'re making the right decision with expert guidance on every step of the franchise journey.',
+  },
+  {
+    icon: Unlock,
+    title: 'Unlock the Best Opportunities',
+    description: 'Get matched with franchises that fit your budget, goals, and lifestyle — options you may never have found on your own.',
+  },
+  {
+    icon: Goal,
+    title: 'Fast-Track Your Success',
+    description: 'Save time, avoid costly mistakes, and move into ownership with clarity and confidence.',
+  },
+]
+
+const painPoints = [
+  'Not sure which franchise is the right fit',
+  'Overwhelmed by too many options',
+  'Afraid of making the wrong investment',
+]
+
 export default async function HomePage() {
   const supabase = createClient()
   const adminSupabase = createAdminClient()
@@ -66,7 +93,13 @@ export default async function HomePage() {
   const matchesHref = hasSavedMatches
     ? `/quiz/results?id=${encodeURIComponent(lastQuizResultId as string)}`
     : '/quiz'
-  
+
+  // Fetch display name for personalized hero
+  let displayName: string | null = null
+  if (hasSavedMatches) {
+    displayName = await getQuizDisplayName(adminSupabase, lastQuizResultId as string)
+  }
+
   // Fetch featured franchises
   const { data: featuredFranchises } = await supabase
     .from('franchises')
@@ -78,84 +111,105 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-cream via-white to-brand-cream py-20 lg:py-28">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
-        
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-8 items-center">
-            <div className="text-center lg:text-left">
-              <h1 className="heading-hero">
-                Find Your Perfect{' '}
-                <span className="text-brand-gold">Franchise Match</span>{' '}
-                in Minutes
-              </h1>
-              <p className="mt-6 text-lg text-gray-600 lg:text-xl">
-                Take our free AI-powered quiz and discover franchise opportunities 
-                tailored to your goals, budget, and lifestyle. Join thousands who've 
-                found their path to business ownership.
-              </p>
-              
-              <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center lg:justify-start">
-                <Link href={matchesHref}>
-                  <Button size="lg" className="w-full sm:w-auto bg-brand-navy text-brand-gold hover:bg-brand-navy-light text-lg px-8 py-6">
-                    {hasSavedMatches ? 'View My Matches' : 'Take the Free Quiz'}
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link href="/directory">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6">
-                    Browse Directory
-                  </Button>
-                </Link>
-              </div>
+      <HeroSection
+        hasSavedMatches={hasSavedMatches}
+        matchesHref={matchesHref}
+        displayName={displayName}
+      />
 
-              <div className="mt-8 flex items-center justify-center gap-4 lg:justify-start">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="h-10 w-10 rounded-full border-2 border-white bg-gray-200"
-                    />
-                  ))}
-                </div>
-                <div className="text-sm text-gray-600">
-                  <span className="font-semibold text-brand-navy">10,000+</span> people found their franchise
+      {/* Strong Statement */}
+      <section className="bg-gradient-to-r from-[#CEC8B1]/10 via-white to-[#859FAD]/10 py-16 border-y border-[#859FAD]/20">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <p className="text-2xl md:text-3xl font-bold text-[#062234] leading-tight">
+            For aspiring franchise owners who want a{' '}
+            <span className="text-[#C19B3F]">guided, faster path</span> to ownership—
+            <br className="hidden md:block" />
+            no guesswork, just results.
+          </p>
+        </div>
+      </section>
+
+      {/* Success Cards */}
+      <section className="bg-white py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {successCards.map((item, index) => (
+              <div
+                key={index}
+                className="group relative p-8 rounded-2xl bg-white backdrop-blur-sm border border-[#859FAD]/20 hover:border-[#C19B3F]/50 hover:shadow-[0_20px_60px_rgba(193,155,63,0.15)] transition-all duration-300 hover:-translate-y-2"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#C19B3F]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl" />
+                <div className="relative">
+                  <div className="flex justify-center mb-6">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#C19B3F]/10 to-[#859FAD]/10 flex items-center justify-center text-[#062234] group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                      <item.icon className="h-12 w-12" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#062234] mb-4 text-center">{item.title}</h3>
+                  <p className="text-[#062234]/70 text-center leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Problem Section */}
+      <section className="bg-gradient-to-br from-[#062234] to-[#0a1929] text-white py-24 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-10 left-10 w-64 h-64 bg-[#C19B3F] rounded-full filter blur-3xl" />
+          <div className="absolute bottom-10 right-10 w-64 h-64 bg-[#859FAD] rounded-full filter blur-3xl" />
+        </div>
+        <div className="container mx-auto px-6 text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-bold mb-12">Most aspiring entrepreneurs fail because they start alone.</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
+            {painPoints.map((problem, index) => (
+              <div
+                key={index}
+                className="p-6 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300"
+              >
+                <p className="text-lg text-white/90">{problem}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-[#CEC8B1] text-2xl font-bold">
+            It doesn&apos;t have to be that way.
+          </p>
+        </div>
+      </section>
+
+      {/* Guide Section */}
+      <section className="bg-gradient-to-br from-white to-[#CEC8B1]/10 py-24">
+        <div className="container mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
+          <div className="lg:w-1/2">
+            <div className="inline-block px-4 py-2 rounded-full bg-[#C19B3F]/10 text-[#C19B3F] text-sm font-semibold mb-4">
+              Your Success Partner
             </div>
-
-            <div className="relative hidden lg:block">
-              <div className="absolute -top-4 -right-4 h-72 w-72 rounded-full bg-brand-gold/20 blur-3xl" />
-              <div className="absolute -bottom-4 -left-4 h-72 w-72 rounded-full bg-brand-navy/10 blur-3xl" />
-              <Card className="relative overflow-hidden border-0 shadow-2xl">
-                <CardContent className="p-8">
-                  <div className="mb-6 flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-gold">
-                      <Star className="h-6 w-6 text-brand-navy" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-brand-navy">Quiz Preview</p>
-                      <p className="text-sm text-gray-500">3 minutes to your match</p>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="rounded-lg bg-brand-cream p-4">
-                      <p className="text-sm font-medium text-brand-navy">What's your investment budget?</p>
-                      <div className="mt-3 space-y-2">
-                        {['Under $50K', '$50K - $100K', '$100K - $250K'].map((option) => (
-                          <div
-                            key={option}
-                            className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 text-sm"
-                          >
-                            <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
-                            {option}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#062234] mb-6">We guide you every step of the way.</h2>
+            <p className="text-xl text-[#062234]/80 leading-relaxed mb-6">At the AFPA we educate entrepreneurs as they search for the perfect franchise. With personalized support, you&apos;ll never be left guessing.</p>
+            <div className="flex flex-col gap-4">
+              {[
+                'Personalized franchise matching',
+                'Expert consultation at every stage',
+                'Access to exclusive opportunities',
+              ].map((benefit, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <CheckCircle2 className="w-6 h-6 text-[#C19B3F] flex-shrink-0" />
+                  <span className="text-[#062234] font-medium">{benefit}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="lg:w-1/2">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+              <img
+                src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1332&auto=format&fit=crop"
+                alt="Advisor helping client"
+                className="w-full h-auto"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#062234]/50 to-transparent" />
             </div>
           </div>
         </div>
@@ -321,7 +375,7 @@ export default async function HomePage() {
             Ready to Find Your Perfect Franchise?
           </h2>
           <p className="mt-4 text-lg text-gray-300">
-            Join thousands of aspiring franchise owners who've found their path to 
+            Join thousands of aspiring franchise owners who&apos;ve found their path to
             business ownership with our AI-powered matching system.
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
@@ -355,4 +409,14 @@ async function quizResultExists(supabase: any, id: string): Promise<boolean> {
   if (!fallback.error) return Boolean(fallback.data?.id)
 
   return false
+}
+
+async function getQuizDisplayName(supabase: any, id: string): Promise<string | null> {
+  const primary = await supabase.from('quiz_result').select('first_name').eq('id', id).maybeSingle()
+  if (!primary.error && primary.data?.first_name) return primary.data.first_name
+
+  const fallback = await supabase.from('quiz_results').select('first_name').eq('id', id).maybeSingle()
+  if (!fallback.error && fallback.data?.first_name) return fallback.data.first_name
+
+  return null
 }

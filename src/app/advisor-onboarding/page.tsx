@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import type { Advisor, Profile } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -78,23 +79,34 @@ export default function AdvisorOnboardingPage() {
       }
 
       // Check if user has advisor role in profiles
-      const { data: profile } = await supabase
+      const { data: profileData } = await supabase
         .from('profiles')
         .select('role, full_name, email')
         .eq('id', user.id)
         .single()
+
+      const profile = profileData as Pick<Profile, 'role' | 'full_name' | 'email'> | null
 
       if (!profile || profile.role !== 'advisor') {
         router.push('/dashboard')
         return
       }
 
+      if (!user.email) {
+        router.push('/dashboard')
+        return
+      }
+
+      const userEmail = user.email
+
       // Look up their advisor record by email
-      const { data: advisor } = await supabase
-        .from('advisor')
+      const advisorTable = supabase.from('advisor') as any
+      const { data: advisorData } = await advisorTable
         .select('*')
-        .eq('email', user.email)
+        .eq('email', userEmail)
         .single()
+
+      const advisor = advisorData as Advisor | null
 
       if (advisor) {
         // If already onboarded (has bio + calendar), go to dashboard
@@ -183,16 +195,16 @@ export default function AdvisorOnboardingPage() {
 
       if (advisorId) {
         // Update existing advisor record
-        const { error } = await supabase
-          .from('advisor')
+        const advisorTable = supabase.from('advisor') as any
+        const { error } = await advisorTable
           .update(payload)
           .eq('id', advisorId)
         if (error) throw error
       } else {
         // Create new advisor record
         const { data: { user } } = await supabase.auth.getUser()
-        const { error } = await supabase
-          .from('advisor')
+        const advisorTable = supabase.from('advisor') as any
+        const { error } = await advisorTable
           .insert({
             ...payload,
             email: user?.email || null,

@@ -7,11 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Check, Building2, Users, FileText, Scale, Briefcase, GraduationCap, Heart, Shield, Globe, Star, MapPin, Phone, Mail, Calendar } from 'lucide-react'
 
-export const metadata = {
-  title: 'Education Hub | AFPA Connect',
-  description: 'Resources and guides for aspiring franchise owners.',
-}
-
 const categories = [
   {
     name: 'Getting Started',

@@ -63,7 +63,8 @@ export default function AdvisorSignupPage() {
 
     try {
       const supabase = createClient()
-      const { error } = await supabase.from('advisor_applications').insert({
+      const advisorApplications = supabase.from('advisor_applications') as any
+      const { error } = await advisorApplications.insert({
         first_name: formData.name.split(' ')[0] || formData.name,
         last_name: formData.name.split(' ').slice(1).join(' ') || '',
         email: formData.email,

@@ -7,11 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Check, Building2, Calculator, FileText, Shield, TrendingUp, Users, DollarSign, Clock, Star } from 'lucide-react'
 
-export const metadata = {
-  title: 'Investment Calculator | AFPA Connect',
-  description: 'Calculate your potential franchise investment and ROI.',
-}
-
 export default function InvestmentCalculatorPage() {
   const [investment, setInvestment] = useState(100000)
   const [experience, setExperience] = useState('5')
