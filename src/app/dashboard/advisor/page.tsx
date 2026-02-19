@@ -1,15 +1,13 @@
 import Link from 'next/link'
 import { requireAdvisor } from '@/lib/require-role'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { Users, Target, TrendingUp, Phone, Mail, Calendar, ArrowRight, Clock, CheckCircle, AlertCircle, Building2, ExternalLink, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 async function getAdvisorData(userId: string) {
-  const supabase = createClient()
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single()
-  if (!profile || profile.role !== 'advisor') return null
+  const supabase = createAdminClient()
   const { data: leads } = await supabase.from('leads').select('*').eq('attributed_advisor_id', userId).order('created_at', { ascending: false })
   const { data: quizResults } = await supabase.from('quiz_results').select('*').eq('attributed_advisor_id', userId).order('created_at', { ascending: false })
   const totalLeads = leads?.length || 0
@@ -21,7 +19,6 @@ async function getAdvisorData(userId: string) {
   thisMonth.setHours(0, 0, 0, 0)
   const thisMonthLeads = leads?.filter(l => new Date(l.created_at) >= thisMonth).length || 0
   return {
-    profile,
     leads: leads || [],
     quizResults: quizResults || [],
     stats: { totalLeads, newLeads, contactedLeads, convertedLeads, thisMonthLeads, conversionRate: totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0 },
@@ -37,10 +34,9 @@ const statusColors: Record<string, { bg: string; text: string }> = {
   unqualified: { bg: 'bg-gray-100', text: 'text-gray-700' },
 }
 export default async function AdvisorDashboardPage() {
-  const { user } = await requireAdvisor('/dashboard/advisor')
+  const { user, profile } = await requireAdvisor('/dashboard/advisor')
   const data = await getAdvisorData(user.id)
-  if (!data) return null
-  const { profile, leads, stats } = data
+  const { leads, stats } = data
   const affiliateLink = 'https://afpaconnect.com/quiz?advisor=' + user.id
   return (
     <div className="min-h-screen bg-gray-50">
