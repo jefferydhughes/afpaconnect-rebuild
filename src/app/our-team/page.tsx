@@ -1,14 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import type { Advisor } from '@/types/database'
 import Link from 'next/link'
-import { Award, Linkedin, Loader2, Star, Target, TrendingUp, Users } from 'lucide-react'
+import Image from 'next/image'
+import { Award, Linkedin, Star, Target, TrendingUp, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata = {
   title: 'Leadership Team | AFPA Connect',
   description:
-    'Meet the visionary leaders guiding AFPA's mission to connect entrepreneurs with exceptional franchise opportunities.',
+    "Meet the visionary leaders guiding AFPA's mission to connect entrepreneurs with exceptional franchise opportunities.",
 }
 
 async function getLeaders() {
@@ -78,9 +79,11 @@ export default async function LeadershipTeamPage() {
                   <CardContent className="p-8 text-center">
                     <div className="w-48 h-48 mx-auto mb-6 overflow-hidden rounded-full bg-slate-100 border-4 border-white shadow-lg flex items-center justify-center">
                       {leader.image_url ? (
-                        <img
+                        <Image
                           src={leader.image_url}
                           alt={leader.name ?? 'Leadership team member'}
+                          width={192}
+                          height={192}
                           className="w-full h-full object-cover"
                         />
                       ) : (

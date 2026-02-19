@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import HeroSection from '@/components/home/HeroSection'
 
@@ -83,13 +83,12 @@ const painPoints = [
 
 export default async function HomePage() {
   const supabase = createClient()
-  const adminSupabase = createAdminClient()
   const cookieStore = cookies()
   const lastQuizResultId = cookieStore.get('afpa_last_quiz_result_id')?.value?.trim() || null
   const hasSavedMatches =
     Boolean(lastQuizResultId) &&
     isUuid(lastQuizResultId as string) &&
-    (await quizResultExists(adminSupabase, lastQuizResultId as string))
+    (await quizResultExists(supabase, lastQuizResultId as string))
   const matchesHref = hasSavedMatches
     ? `/quiz/results?id=${encodeURIComponent(lastQuizResultId as string)}`
     : '/quiz'
@@ -97,7 +96,7 @@ export default async function HomePage() {
   // Fetch display name for personalized hero
   let displayName: string | null = null
   if (hasSavedMatches) {
-    displayName = await getQuizDisplayName(adminSupabase, lastQuizResultId as string)
+    displayName = await getQuizDisplayName(supabase, lastQuizResultId as string)
   }
 
   // Fetch featured franchises

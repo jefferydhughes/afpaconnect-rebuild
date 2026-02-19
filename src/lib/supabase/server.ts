@@ -44,19 +44,31 @@ export function createClient() {
   ) as any
 }
 
-// Admin client for server-side operations that need to bypass RLS
+// Admin client for server-side operations that need to bypass RLS.
+// Falls back to the anon key with a warning if SUPABASE_SERVICE_ROLE_KEY is not set
+// (e.g. missing from Vercel env vars) so the site doesn't hard-crash.
+// Add SUPABASE_SERVICE_ROLE_KEY to your Vercel environment variables for full admin access.
 export function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (!supabaseUrl || (!serviceRoleKey && !anonKey)) {
     throw new Error(
-      'Missing Supabase admin env vars. Set SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY.'
+      'Missing Supabase env vars. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.'
+    )
+  }
+
+  if (!serviceRoleKey) {
+    console.warn(
+      '[Supabase] SUPABASE_SERVICE_ROLE_KEY is not set — admin client falling back to anon key. ' +
+      'RLS policies will apply. Add the service role key in Vercel > Settings > Environment Variables.'
     )
   }
 
   return createServerClient<SupabaseDatabase>(
     supabaseUrl,
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    serviceRoleKey ?? anonKey!,
     {
       cookies: {
         get() { return undefined },

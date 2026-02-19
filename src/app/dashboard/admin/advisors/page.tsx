@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Plus, Search, UserCheck, Edit, Mail, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import DeleteAdvisorButton from '@/components/admin/DeleteAdvisorButton'
 import type { Advisor } from '@/types/database'
 
 async function getAdvisors(search?: string, page = 1) {
-  const supabase = createClient()
+  const supabase = createAdminClient()
   const pageSize = 50
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1

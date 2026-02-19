@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Plus, Search, Building2, Edit, Eye, Star } from 'lucide-react'
@@ -11,7 +11,7 @@ import { formatCurrency } from '@/lib/utils'
 import type { Franchise } from '@/types/database'
 
 async function getFranchises(search?: string, page = 1) {
-  const supabase = createClient()
+  const supabase = createAdminClient()
   const pageSize = 50
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1

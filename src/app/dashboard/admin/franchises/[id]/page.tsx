@@ -1,6 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import FranchiseForm from '@/components/admin/FranchiseForm'
@@ -23,7 +23,8 @@ export default async function EditFranchisePage({
 
   if (!profile || profile.role !== 'admin') redirect('/dashboard')
 
-  const { data: franchise } = await supabase
+  const adminSupabase = createAdminClient()
+  const { data: franchise } = await adminSupabase
     .from('franchises')
     .select('*')
     .eq('id', params.id)
