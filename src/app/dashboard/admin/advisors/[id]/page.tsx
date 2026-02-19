@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/require-role'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AdvisorForm from '@/components/admin/AdvisorForm'
@@ -10,15 +11,10 @@ export default async function EditAdvisorPage({
 }: {
   params: { id: string }
 }) {
-  const supabase = createClient()
+  await requireAdmin('/dashboard/admin/advisors')
 
-  // TODO: RE-ENABLE AUTH BEFORE PRODUCTION
-  // const { data: { user } } = await supabase.auth.getUser()
-  // if (!user) redirect('/login?redirect=/dashboard/admin/advisors')
-  // const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  // if (!profile || profile.role !== 'admin') redirect('/dashboard')
-
-  const { data: advisor } = await supabase
+  const adminSupabase = createAdminClient()
+  const { data: advisor } = await adminSupabase
     .from('advisor')
     .select('*')
     .eq('id', params.id)

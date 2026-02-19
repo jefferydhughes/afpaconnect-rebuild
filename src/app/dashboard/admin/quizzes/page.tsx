@@ -1,12 +1,12 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/require-role'
 import { FileText, Search, Download } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 async function getQuizResults() {
-  const supabase = createClient()
+  const supabase = createAdminClient()
 
   const { data: results } = await supabase
     .from('quiz_results')
@@ -17,23 +17,7 @@ async function getQuizResults() {
 }
 
 export default async function AdminQuizzesPage() {
-  const supabase = createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login?redirect=/dashboard/admin/quizzes')
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !['admin'].includes(profile.role)) {
-    redirect('/dashboard')
-  }
+  await requireAdmin('/dashboard/admin/quizzes')
 
   const results = await getQuizResults()
 

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { 
   User, 
   FileText, 
@@ -72,14 +72,27 @@ async function getDashboardData(userId: string, userEmail: string) {
 
 export default async function DashboardPage() {
   const supabase = createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   if (!user) {
     redirect('/login?redirect=/dashboard')
   }
 
-  const { profile, quizResults, infoRequests, matchedFranchises, latestQuiz } = 
+  // Role-based routing: use admin client so RLS doesn't block the profile read
+  const adminClient = createAdminClient()
+  const { data: roleCheck } = await adminClient
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (roleCheck?.role === 'admin') redirect('/dashboard/admin')
+  if (roleCheck?.role === 'advisor') redirect('/dashboard/advisor')
+  if (roleCheck?.role === 'franchisor') redirect('/dashboard/franchisor')
+  if (roleCheck?.role === 'franchise_rep') redirect('/dashboard/franchise-rep')
+
+  const { profile, quizResults, infoRequests, matchedFranchises, latestQuiz } =
     await getDashboardData(user.id, user.email!)
 
   const matchScores = latestQuiz?.match_scores as Record<string, any> || {}

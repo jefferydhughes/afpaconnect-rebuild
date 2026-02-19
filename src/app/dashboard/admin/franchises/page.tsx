@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/require-role'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Plus, Search, Building2, Edit, Eye, Star } from 'lucide-react'
@@ -10,8 +11,7 @@ import DeleteFranchiseButton from '@/components/admin/DeleteFranchiseButton'
 import { formatCurrency } from '@/lib/utils'
 import type { Franchise } from '@/types/database'
 
-async function getFranchises(search?: string, page = 1) {
-  const supabase = createAdminClient()
+async function getFranchises(supabase: any, search?: string, page = 1) {
   const pageSize = 50
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
@@ -33,9 +33,11 @@ export default async function AdminFranchisesPage({
 }: {
   searchParams: { search?: string; page?: string }
 }) {
+  await requireAdmin('/dashboard/admin/franchises')
+
   const parsedPage = Number.parseInt(searchParams.page ?? '1', 10)
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
-  const { franchises, total, pageSize } = await getFranchises(searchParams.search, page)
+  const { franchises, total, pageSize } = await getFranchises(createAdminClient(), searchParams.search, page)
   const totalPages = Math.ceil(total / pageSize)
 
   return (

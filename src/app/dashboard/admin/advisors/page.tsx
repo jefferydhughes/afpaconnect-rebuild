@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/require-role'
 import Link from 'next/link'
 import { Plus, Search, UserCheck, Edit, Mail, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -32,6 +33,8 @@ export default async function AdminAdvisorsPage({
 }: {
   searchParams: { search?: string; page?: string }
 }) {
+  await requireAdmin('/dashboard/admin/advisors')
+
   const parsedPage = Number.parseInt(searchParams.page ?? '1', 10)
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
   const { advisors, total, pageSize } = await getAdvisors(searchParams.search, page)

@@ -1,28 +1,11 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/require-role'
 import { Settings, Globe, Bell, Shield, Database, Mail } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 export default async function AdminSettingsPage() {
-  const supabase = createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login?redirect=/dashboard/admin/settings')
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, full_name, email')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !['admin'].includes(profile.role)) {
-    redirect('/dashboard')
-  }
+  const { user, profile } = await requireAdmin('/dashboard/admin/settings')
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -1,7 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
-import { 
-  Search, 
-  Users, 
+import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/require-role'
+import {
+  Search,
+  Users,
   Phone,
   Mail,
   MoreHorizontal,
@@ -25,8 +26,8 @@ type LeadWithProfile = Lead & {
 }
 
 async function getLeads(status?: string) {
-  const supabase = createClient()
-  
+  const supabase = createAdminClient()
+
   let query = supabase
     .from('leads')
     .select(`
@@ -58,6 +59,8 @@ export default async function AdminLeadsPage({
 }: {
   searchParams: { status?: string }
 }) {
+  await requireAdmin('/dashboard/admin/leads')
+
   const leads = await getLeads(searchParams.status)
 
   // Calculate stats

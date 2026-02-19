@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import {
   Home,
   Building2,
@@ -16,7 +16,8 @@ import {
 import { Button } from '@/components/ui/button'
 
 async function getUserRole(userId: string) {
-  const supabase = createClient()
+  // Use admin client so RLS on profiles table doesn't prevent reading own role
+  const supabase = createAdminClient()
 
   const { data: profile } = await supabase
     .from('profiles')

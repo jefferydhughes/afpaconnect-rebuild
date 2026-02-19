@@ -1,23 +1,11 @@
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/require-role'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import FranchiseForm from '@/components/admin/FranchiseForm'
 
 export default async function NewFranchisePage() {
-  const supabase = createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?redirect=/dashboard/admin/franchises/new')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'admin') redirect('/dashboard')
+  await requireAdmin('/dashboard/admin/franchises/new')
 
   return (
     <div className="min-h-screen bg-gray-50">

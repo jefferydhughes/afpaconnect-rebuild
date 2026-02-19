@@ -1,8 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
-import { 
-  Search, 
-  Users, 
-  Shield, 
+import { createAdminClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/require-role'
+import {
+  Search,
+  Users,
+  Shield,
   UserCheck,
   MoreHorizontal,
   Mail
@@ -19,8 +20,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 async function getUsers(search?: string) {
-  const supabase = createClient()
-  
+  const supabase = createAdminClient()
+
   let query = supabase
     .from('profiles')
     .select('*')
@@ -56,6 +57,8 @@ export default async function AdminUsersPage({
 }: {
   searchParams: { search?: string }
 }) {
+  await requireAdmin('/dashboard/admin/users')
+
   const users = await getUsers(searchParams.search)
 
   // Calculate stats
