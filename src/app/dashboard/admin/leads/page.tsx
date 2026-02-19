@@ -18,6 +18,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import type { Lead } from '@/types/database'
+
+type LeadWithProfile = Lead & {
+  profiles?: { full_name: string | null } | null
+}
 
 async function getLeads(status?: string) {
   const supabase = createClient()
@@ -36,7 +41,7 @@ async function getLeads(status?: string) {
 
   const { data } = await query.limit(100)
 
-  return data || []
+  return (data || []) as LeadWithProfile[]
 }
 
 const statusColors: Record<string, { bg: string; text: string }> = {
@@ -58,9 +63,9 @@ export default async function AdminLeadsPage({
   // Calculate stats
   const stats = {
     total: leads.length,
-    new: leads.filter(l => l.status === 'new').length,
-    contacted: leads.filter(l => l.status === 'contacted').length,
-    converted: leads.filter(l => l.status === 'converted').length,
+    new: leads.filter((l: LeadWithProfile) => String(l.status) === 'new').length,
+    contacted: leads.filter((l: LeadWithProfile) => String(l.status) === 'contacted').length,
+    converted: leads.filter((l: LeadWithProfile) => String(l.status) === 'converted').length,
   }
 
   return (
@@ -168,7 +173,7 @@ export default async function AdminLeadsPage({
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {leads.map((lead) => (
+                {leads.map((lead: LeadWithProfile) => (
                   <tr key={lead.id} className="hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <div>
@@ -201,7 +206,9 @@ export default async function AdminLeadsPage({
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <Badge className={`${statusColors[lead.status]?.bg} ${statusColors[lead.status]?.text} border-0 capitalize`}>
+                      <Badge
+                        className={`${statusColors[String(lead.status)]?.bg || 'bg-gray-100'} ${statusColors[String(lead.status)]?.text || 'text-gray-700'} border-0 capitalize`}
+                      >
                         {lead.status}
                       </Badge>
                     </td>

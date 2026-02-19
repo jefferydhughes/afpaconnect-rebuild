@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+function sanitizeNextPath(value: string | null): string {
+  if (!value) return '/dashboard'
+  if (!value.startsWith('/')) return '/dashboard'
+  if (value.startsWith('//')) return '/dashboard'
+  return value
+}
+
 // This route handles:
 // 1. Email confirmation links (Supabase sends ?code=xxx back here)
 // 2. OAuth provider callbacks (Google, etc. - future use)
@@ -8,7 +15,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/dashboard'
+  const next = sanitizeNextPath(searchParams.get('next'))
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
 
@@ -36,19 +43,22 @@ export async function GET(request: Request) {
     if (data?.user) {
       // Ensure a profiles row exists for this user.
       // This covers cases where the trigger hasn't fired or is missing.
-      const { data: existingProfile } = await supabase
+      const { data: existingProfile, error: profileLookupError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', data.user.id)
-        .single()
+        .maybeSingle()
 
-      if (!existingProfile) {
-        await supabase.from('profiles').insert({
+      if (!existingProfile && !profileLookupError) {
+        const { error: profileInsertError } = await supabase.from('profiles').insert({
           id: data.user.id,
           email: data.user.email!,
           full_name: data.user.user_metadata?.full_name || null,
           role: 'user',
         })
+        if (profileInsertError) {
+          console.error('Profile creation error:', profileInsertError)
+        }
       }
     }
 

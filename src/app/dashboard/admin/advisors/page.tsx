@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import DeleteAdvisorButton from '@/components/admin/DeleteAdvisorButton'
+import type { Advisor } from '@/types/database'
 
 async function getAdvisors(search?: string, page = 1) {
   const supabase = createClient()
@@ -23,7 +24,7 @@ async function getAdvisors(search?: string, page = 1) {
   if (search) query = query.ilike('name', `%${search}%`)
 
   const { data, count } = await query
-  return { advisors: data || [], total: count || 0, pageSize }
+  return { advisors: (data || []) as Advisor[], total: count || 0, pageSize }
 }
 
 export default async function AdminAdvisorsPage({
@@ -31,7 +32,8 @@ export default async function AdminAdvisorsPage({
 }: {
   searchParams: { search?: string; page?: string }
 }) {
-  const page = parseInt(searchParams.page ?? '1', 10)
+  const parsedPage = Number.parseInt(searchParams.page ?? '1', 10)
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
   const { advisors, total, pageSize } = await getAdvisors(searchParams.search, page)
   const totalPages = Math.ceil(total / pageSize)
 
@@ -89,7 +91,7 @@ export default async function AdminAdvisorsPage({
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {advisors.map((advisor) => (
+                {advisors.map((advisor: Advisor) => (
                   <tr key={advisor.id} className="hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">

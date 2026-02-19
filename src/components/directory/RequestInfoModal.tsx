@@ -13,7 +13,10 @@ import { toast } from 'sonner'
 interface RequestInfoModalProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  franchise: any
+  franchise: {
+    id: string
+    name: string
+  } | null
 }
 
 export default function RequestInfoModal({ isOpen, onOpenChange, franchise }: RequestInfoModalProps) {
@@ -46,18 +49,31 @@ export default function RequestInfoModal({ isOpen, onOpenChange, franchise }: Re
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const firstName = formData.first_name.trim()
+    const lastName = formData.last_name.trim()
+    const email = formData.email.trim().toLowerCase()
+    const phone = formData.phone.trim()
+    const message = formData.message.trim()
+
+    if (!firstName || !lastName || !email) {
+      toast.error('First name, last name, and email are required.')
+      return
+    }
+
     setIsSubmitting(true)
     
     try {
       const { error } = await supabase
         .from('leads')
         .insert({
-          email: formData.email,
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone: formData.phone,
-          lead_source: 'listing_request_info',
-          notes: `Request Info from Listing Page - ${franchise.name}\nMessage: ${formData.message}`
+          email,
+          first_name: firstName,
+          last_name: lastName,
+          phone: phone || null,
+          source: 'listing_request_info',
+          message: `Request Info from Listing Page - ${franchise.name}\nMessage: ${message || 'No message provided.'}`,
+          franchise_ids: [franchise.id],
         })
 
       if (error) {

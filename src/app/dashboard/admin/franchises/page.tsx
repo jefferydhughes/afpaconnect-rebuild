@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import DeleteFranchiseButton from '@/components/admin/DeleteFranchiseButton'
 import { formatCurrency } from '@/lib/utils'
+import type { Franchise } from '@/types/database'
 
 async function getFranchises(search?: string, page = 1) {
   const supabase = createClient()
@@ -24,7 +25,7 @@ async function getFranchises(search?: string, page = 1) {
   if (search) query = query.ilike('name', `%${search}%`)
 
   const { data, count } = await query
-  return { franchises: data || [], total: count || 0, pageSize }
+  return { franchises: (data || []) as Franchise[], total: count || 0, pageSize }
 }
 
 export default async function AdminFranchisesPage({
@@ -32,7 +33,8 @@ export default async function AdminFranchisesPage({
 }: {
   searchParams: { search?: string; page?: string }
 }) {
-  const page = parseInt(searchParams.page ?? '1', 10)
+  const parsedPage = Number.parseInt(searchParams.page ?? '1', 10)
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1
   const { franchises, total, pageSize } = await getFranchises(searchParams.search, page)
   const totalPages = Math.ceil(total / pageSize)
 
@@ -90,7 +92,7 @@ export default async function AdminFranchisesPage({
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {franchises.map((franchise) => (
+                {franchises.map((franchise: Franchise) => (
                   <tr key={franchise.id} className="hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
@@ -98,7 +100,7 @@ export default async function AdminFranchisesPage({
                           {franchise.logo_url ? (
                             <Image
                               src={franchise.logo_url}
-                              alt={franchise.name}
+                              alt={franchise.name || 'Franchise logo'}
                               width={36}
                               height={36}
                               className="object-contain"

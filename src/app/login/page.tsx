@@ -13,7 +13,13 @@ import { toast } from 'sonner'
 
 type AuthMode = 'login' | 'signup' | 'forgot'
 
-// Inner component — uses useSearchParams, so must be inside <Suspense>
+function sanitizeRedirectPath(value: string | null): string {
+  if (!value) return '/dashboard'
+  if (!value.startsWith('/')) return '/dashboard'
+  if (value.startsWith('//')) return '/dashboard'
+  return value
+}
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -28,12 +34,16 @@ function LoginForm() {
   useEffect(() => {
     const error = searchParams.get('error')
     if (error) {
-      toast.error(decodeURIComponent(error))
+      try {
+        toast.error(decodeURIComponent(error))
+      } catch {
+        toast.error(error)
+      }
     }
   }, [searchParams])
 
   // Where to send the user after login
-  const redirectTo = searchParams.get('redirect') || '/dashboard'
+  const redirectTo = sanitizeRedirectPath(searchParams.get('redirect'))
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -357,3 +367,4 @@ export default function LoginPage() {
     </Suspense>
   )
 }
+

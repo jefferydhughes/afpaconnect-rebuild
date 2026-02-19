@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
+import { z } from 'zod'
 
 type QuizPayload = {
   budget?: string
@@ -27,6 +28,24 @@ type QuizMatch = {
   [key: string]: any
 }
 
+const quizPayloadSchema = z.object({
+  budget: z.string().trim().max(50).optional(),
+  categories: z.array(z.string().trim().min(1).max(80)).max(20).optional().default([]),
+  business_model: z.string().trim().max(50).optional(),
+  time_commitment: z.string().trim().max(50).optional(),
+  experience: z.string().trim().max(50).optional(),
+  territory: z.array(z.string().trim().min(1).max(80)).max(20).optional().default([]),
+  goals: z.array(z.string().trim().min(1).max(120)).max(20).optional().default([]),
+  contact: z.object({
+    firstName: z.string().trim().max(120).optional(),
+    lastName: z.string().trim().max(120).optional(),
+    email: z.string().trim().email(),
+    phone: z.string().trim().max(40).optional(),
+  }),
+  attributed_advisor_id: z.string().trim().optional(),
+  source: z.string().trim().max(80).optional(),
+}).strict()
+
 function getOpenAIClient() {
   if (!process.env.OPENAI_API_KEY) return null
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
@@ -34,7 +53,15 @@ function getOpenAIClient() {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as QuizPayload
+    const parsedBody = quizPayloadSchema.safeParse(await request.json())
+    if (!parsedBody.success) {
+      return NextResponse.json(
+        { error: 'Invalid quiz payload', details: parsedBody.error.flatten() },
+        { status: 400 }
+      )
+    }
+
+    const body = parsedBody.data
     const supabase = createAdminClient()
 
     const {
@@ -49,6 +76,7 @@ export async function POST(request: NextRequest) {
       attributed_advisor_id,
       source = 'website',
     } = body
+    const normalizedSource = source.trim() || 'website'
 
     const adminNotificationEmail =
       process.env.AFPA_DEFAULT_ADMIN_EMAIL ||
@@ -61,40 +89,46 @@ export async function POST(request: NextRequest) {
       adminNotificationEmail
     )
 
-    if (!contact?.email) {
-      return NextResponse.json({ error: 'Contact email is required' }, { status: 400 })
+    const normalizedContact = {
+      firstName: contact.firstName?.trim() || '',
+      lastName: contact.lastName?.trim() || '',
+      email: contact.email.trim().toLowerCase(),
+      phone: contact.phone?.trim() || '',
     }
+    const normalizedCategories = Array.from(new Set(categories.map((item) => item.trim())))
+    const normalizedTerritory = Array.from(new Set(territory.map((item) => item.trim())))
+    const normalizedGoals = Array.from(new Set(goals.map((item) => item.trim())))
 
     const userProfile = buildUserProfile({
       budget,
-      categories,
+      categories: normalizedCategories,
       business_model,
       time_commitment,
       experience,
-      territory,
-      goals,
+      territory: normalizedTerritory,
+      goals: normalizedGoals,
     })
     const generatedQuizId = createQuizTrackingId()
 
     const quizInsertPayload: Record<string, any> = {
       quiz_id: generatedQuizId,
-      email: contact.email,
-      first_name: contact.firstName || null,
-      last_name: contact.lastName || null,
-      phone: contact.phone || null,
+      email: normalizedContact.email,
+      first_name: normalizedContact.firstName || null,
+      last_name: normalizedContact.lastName || null,
+      phone: normalizedContact.phone || null,
       budget_range: budget || null,
-      preferred_categories: categories,
+      preferred_categories: normalizedCategories,
       business_model_preference: business_model || null,
       time_commitment: time_commitment || null,
       experience_level: experience || null,
-      preferred_territories: territory,
-      goals,
+      preferred_territories: normalizedTerritory,
+      goals: normalizedGoals,
       lifestyle_preferences: [],
       disc_profile_primary: null,
       disc_profile_secondary: null,
       disc_profile_scores: {},
       attributed_consultant_id: effectiveAttributedAdvisorId,
-      source,
+      source: normalizedSource,
       quiz_completed_date: new Date().toISOString(),
     }
 
@@ -117,12 +151,12 @@ export async function POST(request: NextRequest) {
     try {
       matches = await getAIMatches(supabase, {
         budget,
-        categories,
+        categories: normalizedCategories,
         business_model,
         time_commitment,
         experience,
-        territory,
-        goals,
+        territory: normalizedTerritory,
+        goals: normalizedGoals,
       }, userProfile)
     } catch (matchError) {
       console.error('Matching error:', matchError)
@@ -161,10 +195,10 @@ export async function POST(request: NextRequest) {
     }
 
     const leadInsertPayload: Record<string, any> = {
-      email: contact.email,
-      first_name: contact.firstName || null,
-      last_name: contact.lastName || null,
-      phone: contact.phone || null,
+      email: normalizedContact.email,
+      first_name: normalizedContact.firstName || null,
+      last_name: normalizedContact.lastName || null,
+      phone: normalizedContact.phone || null,
       source: 'quiz',
       quiz_result_id: quizResult.id,
       interested_franchises: matches.slice(0, 5).map((m) => m.id),
@@ -192,18 +226,18 @@ export async function POST(request: NextRequest) {
 
     const webhookPayload = {
       quiz_id: (quizResult as any).quiz_id || generatedQuizId,
-      source: source || 'afpaconnect',
-      email: contact.email,
-      first_name: contact.firstName || null,
-      last_name: contact.lastName || null,
-      phone: contact.phone || null,
+      source: normalizedSource || 'afpaconnect',
+      email: normalizedContact.email,
+      first_name: normalizedContact.firstName || null,
+      last_name: normalizedContact.lastName || null,
+      phone: normalizedContact.phone || null,
       budget_range: budget || null,
-      preferred_categories: categories,
+      preferred_categories: normalizedCategories,
       business_model_preference: business_model || null,
       time_commitment: time_commitment || null,
       experience_level: experience || null,
-      preferred_territories: territory,
-      goals,
+      preferred_territories: normalizedTerritory,
+      goals: normalizedGoals,
       lifestyle_preferences: [],
       disc_profile_primary: null,
       disc_profile_secondary: null,
@@ -229,9 +263,9 @@ export async function POST(request: NextRequest) {
       sendUnattributedQuizNotification({
         recipient_email: adminNotificationEmail,
         quiz_result_id: quizResult.id,
-        source,
-        submitted_email: contact.email,
-        submitted_name: [contact.firstName, contact.lastName].filter(Boolean).join(' ').trim() || null,
+        source: normalizedSource,
+        submitted_email: normalizedContact.email,
+        submitted_name: [normalizedContact.firstName, normalizedContact.lastName].filter(Boolean).join(' ').trim() || null,
         budget_range: budget || null,
       }).catch((error) => {
         console.error('Unattributed quiz notification failed (non-blocking):', error)

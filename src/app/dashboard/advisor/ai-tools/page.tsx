@@ -47,7 +47,8 @@ export default async function AdvisorAiToolsPage() {
     return acc
   }, {}) || {}
 
-  const topBudgetRange = Object.entries(budgetBreakdown).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'
+  const budgetEntries = Object.entries(budgetBreakdown) as Array<[string, number]>
+  const topBudgetRange = budgetEntries.sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A'
 
   return (
     <div className="min-h-screen bg-gray-50">

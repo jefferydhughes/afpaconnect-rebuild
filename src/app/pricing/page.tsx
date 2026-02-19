@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import type { ButtonProps } from '@/components/ui/button'
 import { Check, Star, ArrowRight } from 'lucide-react'
 
 export const metadata = {
@@ -68,7 +69,16 @@ const pricingPlans = [
     buttonVariant: 'default',
     popular: false
   }
-]
+] as const satisfies ReadonlyArray<{
+  name: string
+  price: string
+  period: string
+  description: string
+  features: readonly string[]
+  buttonText: string
+  buttonVariant: NonNullable<ButtonProps['variant']>
+  popular: boolean
+}>
 
 const advisorPlans = [
   {
@@ -103,7 +113,15 @@ const advisorPlans = [
     buttonText: 'Go Professional',
     buttonVariant: 'default'
   }
-]
+] as const satisfies ReadonlyArray<{
+  name: string
+  price: string
+  period: string
+  description: string
+  features: readonly string[]
+  buttonText: string
+  buttonVariant: NonNullable<ButtonProps['variant']>
+}>
 
 export default function PricingPage() {
   return (
