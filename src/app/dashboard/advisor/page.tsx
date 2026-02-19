@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { requireAdvisor } from '@/lib/require-role'
 import { createAdminClient } from '@/lib/supabase/server'
-import { Users, Target, TrendingUp, Phone, Mail, Calendar, ArrowRight, Clock, CheckCircle, AlertCircle, Building2, ExternalLink, Copy } from 'lucide-react'
+import { Users, Target, TrendingUp, Phone, Mail, Calendar, ArrowRight, Clock, CheckCircle, AlertCircle, Building2, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import CopyLinkButton from '@/components/advisor/CopyLinkButton'
 
 async function getAdvisorData(userId: string) {
   const supabase = createAdminClient()
@@ -70,7 +71,7 @@ export default async function AdvisorDashboardPage() {
             <div><h3 className="font-semibold text-brand-navy mb-1">Your Affiliate Link</h3><p className="text-sm text-gray-600">Share this link with prospects. All quiz submissions will be attributed to you.</p></div>
             <div className="flex items-center gap-2">
               <code className="px-3 py-2 bg-white rounded-lg text-sm border flex-1 md:flex-none truncate max-w-xs">{affiliateLink}</code>
-              <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(affiliateLink)} className="flex-shrink-0"><Copy className="h-4 w-4" /></Button>
+              <CopyLinkButton text={affiliateLink} />
               <a href={affiliateLink} target="_blank" rel="noopener noreferrer"><Button size="sm" variant="outline" className="flex-shrink-0"><ExternalLink className="h-4 w-4" /></Button></a>
             </div>
           </div>

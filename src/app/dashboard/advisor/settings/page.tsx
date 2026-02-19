@@ -1,8 +1,9 @@
 import { requireAdvisor } from '@/lib/require-role'
-import { Settings, User, Link as LinkIcon, Copy } from 'lucide-react'
+import { Settings, User, Link as LinkIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import CopyLinkButton from '@/components/advisor/CopyLinkButton'
 
 export default async function AdvisorSettingsPage() {
   const { user, profile } = await requireAdvisor('/dashboard/advisor/settings')
@@ -46,7 +47,7 @@ export default async function AdvisorSettingsPage() {
           <CardContent>
             <div className="flex items-center gap-2">
               <code className="flex-1 px-3 py-2 bg-white rounded-lg text-sm border truncate">{affiliateLink}</code>
-              <Button size="sm" variant="outline" className="flex-shrink-0 border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white" onClick={() => {}}><Copy className="h-4 w-4 mr-1" />Copy</Button>
+              <CopyLinkButton text={affiliateLink} />
             </div>
             <p className="text-xs text-gray-600 mt-3">All quiz submissions via this link will be attributed to your account.</p>
           </CardContent>
