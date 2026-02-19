@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import type { Advisor } from '@/types/database'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -14,7 +14,7 @@ export const metadata = {
 
 async function getLeaders() {
   try {
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const { data } = await supabase
       .from('advisor')
       .select('*')

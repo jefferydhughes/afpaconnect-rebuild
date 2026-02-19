@@ -93,16 +93,29 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-brand-navy">Company</h3>
             <ul className="mt-4 space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-gray-600 transition hover:text-brand-navy"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
+              {footerLinks.company.map((link) =>
+                link.href.startsWith('http') ? (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-gray-600 transition hover:text-brand-navy"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ) : (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-600 transition hover:text-brand-navy"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                )
+              )}
             </ul>
           </div>
         </div>
