@@ -1,149 +1,174 @@
+import { createClient } from '@/lib/supabase/server'
+import type { Advisor } from '@/types/database'
 import Link from 'next/link'
+import { Award, Linkedin, Loader2, Star, Target, TrendingUp, Users } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Building2, Users, Globe, Star } from 'lucide-react'
 
 export const metadata = {
   title: 'Leadership Team | AFPA Connect',
-  description: 'Meet the leadership team behind AFPA Connect.',
+  description:
+    'Meet the visionary leaders guiding AFPA's mission to connect entrepreneurs with exceptional franchise opportunities.',
 }
 
-const team = [
+async function getLeaders() {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('advisor')
+    .select('*')
+    .eq('is_active', true)
+    .eq('is_leadership', true)
+    .order('display_order', { ascending: true, nullsFirst: false })
+    .order('name', { ascending: true })
+  return (data as Advisor[] | null) ?? []
+}
+
+const values = [
   {
-    name: 'John Smith',
-    role: 'CEO & Founder',
-    bio: 'With over 20 years in franchise development, John has helped thousands of entrepreneurs find their dream businesses.',
-    image: '/team/john-smith.jpg'
+    title: 'Visionary Leadership',
+    description:
+      'Our leadership team brings decades of experience in franchise development, operations, and strategic growth.',
+    Icon: Award,
   },
   {
-    name: 'Sarah Johnson',
-    role: 'Chief Operations Officer',
-    bio: 'Sarah brings 15 years of operational expertise to help streamline our franchise matching process.',
-    image: '/team/sarah-johnson.jpg'
+    title: 'Industry Expertise',
+    description: 'Deep knowledge of franchising trends, best practices, and what makes franchises succeed.',
+    Icon: Target,
   },
   {
-    name: 'Michael Chen',
-    role: 'VP of Technology',
-    bio: 'Michael leads our AI and matching technology, bringing innovation to franchise discovery.',
-    image: '/team/michael-chen.jpg'
+    title: 'Commitment to Excellence',
+    description: 'Dedicated to maintaining the highest standards in franchise consulting and advisory services.',
+    Icon: Star,
   },
   {
-    name: 'Emily Williams',
-    role: 'Director of Franchise Relations',
-    bio: 'Emily manages relationships with our network of franchisors and franchise advisors.',
-    image: '/team/emily-williams.jpg'
+    title: 'Proven Results',
+    description: 'A track record of successful franchise placements and satisfied clients across industries.',
+    Icon: TrendingUp,
   },
-  {
-    name: 'David Brown',
-    role: 'Director of Client Success',
-    bio: 'David ensures every client receives personalized support throughout their franchise journey.',
-    image: '/team/david-brown.jpg'
-  },
-  {
-    name: 'Jennifer Martinez',
-    role: 'Head of Marketing',
-    bio: 'Jennifer leads our marketing efforts to connect entrepreneurs with franchise opportunities.',
-    image: '/team/jennifer-martinez.jpg'
-  }
 ]
 
-export default function LeadershipTeamPage() {
+export default async function LeadershipTeamPage() {
+  const leaders = await getLeaders()
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       {/* Hero */}
       <section className="bg-brand-navy text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Our Leadership Team</h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Meet the experts dedicated to helping you find your perfect franchise opportunity.
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Leadership Team</h1>
+          <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+            Meet the visionary leaders guiding AFPA&apos;s mission to connect entrepreneurs with exceptional franchise
+            opportunities
           </p>
         </div>
       </section>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Mission */}
-        <section className="mb-16">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
-            <p className="text-lg text-gray-600">
-              We're dedicated to making franchise ownership accessible to everyone. Our team combines decades of experience in franchising, technology, and customer service to create the most effective franchise matching platform in the industry.
+      {/* Team Grid */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {leaders.length === 0 ? (
+            <div className="text-center py-20">
+              <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-600 text-lg">No leadership team members available at this time.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {leaders.map((leader) => (
+                <Card key={leader.id} className="overflow-hidden hover:shadow-xl transition-shadow bg-white">
+                  <CardContent className="p-8 text-center">
+                    <div className="w-48 h-48 mx-auto mb-6 overflow-hidden rounded-full bg-slate-100 border-4 border-white shadow-lg flex items-center justify-center">
+                      {leader.image_url ? (
+                        <img
+                          src={leader.image_url}
+                          alt={leader.name ?? 'Leadership team member'}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Users className="h-16 w-16 text-gray-300" />
+                      )}
+                    </div>
+
+                    <h3 className="text-2xl font-bold text-slate-900 mb-1">{leader.name}</h3>
+                    {leader.title && (
+                      <p className="text-brand-gold font-semibold text-lg mb-4">{leader.title}</p>
+                    )}
+
+                    {leader.linkedin && (
+                      <div className="flex justify-center mb-6">
+                        <a
+                          href={leader.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-400 hover:text-brand-navy transition-colors"
+                          aria-label={`${leader.name} on LinkedIn`}
+                        >
+                          <Linkedin className="w-7 h-7" />
+                        </a>
+                      </div>
+                    )}
+
+                    <Link href={`/advisors/${leader.id}`}>
+                      <Button className="w-full bg-brand-navy text-brand-gold hover:bg-brand-navy-light py-5 text-base font-semibold">
+                        View Profile
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Leadership Philosophy */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Leadership Philosophy</h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Guiding principles that drive our commitment to excellence in franchise consulting.
             </p>
           </div>
-        </section>
 
-        {/* Team */}
-        <section className="mb-16">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {team.map((member, index) => (
-              <Card key={index} className="bg-white border-0 shadow-lg overflow-hidden">
-                <div className="h-64 bg-gradient-to-br from-brand-navy to-brand-navy-light flex items-center justify-center">
-                  <Users className="h-24 w-24 text-white/30" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {values.map(({ title, description, Icon }) => (
+              <div key={title} className="text-center">
+                <div className="w-16 h-16 bg-brand-cream rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Icon className="w-8 h-8 text-brand-navy" />
                 </div>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-1">{member.name}</h3>
-                  <Badge className="mb-3 bg-brand-cream text-brand-navy">{member.role}</Badge>
-                  <p className="text-gray-600 text-sm">{member.bio}</p>
-                </CardContent>
-              </Card>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{description}</p>
+              </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Values */}
-        <section className="mb-16 bg-white rounded-xl p-8 shadow-lg">
-          <h2 className="text-2xl font-bold mb-8 text-center">Our Values</h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-brand-cream rounded-full flex items-center justify-center mx-auto mb-4">
-                <Globe className="h-8 w-8 text-brand-navy" />
-              </div>
-              <h3 className="font-bold mb-2">Integrity</h3>
-              <p className="text-sm text-gray-600">We operate with transparency and honesty in everything we do.</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-brand-cream rounded-full flex items-center justify-center mx-auto mb-4">
-                <Star className="h-8 w-8 text-brand-navy" />
-              </div>
-              <h3 className="font-bold mb-2">Excellence</h3>
-              <p className="text-sm text-gray-600">We strive for excellence in every interaction and service.</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-brand-cream rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-brand-navy" />
-              </div>
-              <h3 className="font-bold mb-2">Client Focus</h3>
-              <p className="text-sm text-gray-600">Our clients' success is our top priority.</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-brand-cream rounded-full flex items-center justify-center mx-auto mb-4">
-                <Building2 className="h-8 w-8 text-brand-navy" />
-              </div>
-              <h3 className="font-bold mb-2">Innovation</h3>
-              <p className="text-sm text-gray-600">We continuously innovate to improve our services.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Ready to Work with Our Team?</h2>
-          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Get in touch with our experienced team to start your franchise journey.
+      {/* CTA */}
+      <section className="py-20 bg-brand-navy text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to Start Your Franchise Journey?</h2>
+          <p className="text-xl text-gray-300 mb-8">
+            Connect with our franchise advisors to explore opportunities that match your goals.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/quiz">
-              <Badge className="bg-brand-gold text-brand-navy hover:bg-brand-gold-light px-8 py-3 text-lg">
-                Take the Quiz
-              </Badge>
+            <Link href="/advisors">
+              <Button size="lg" className="bg-brand-gold text-brand-navy hover:bg-brand-gold-light font-semibold px-8">
+                Meet Our Advisors
+              </Button>
             </Link>
-            <Link href="/contact">
-              <Badge className="bg-brand-navy text-white hover:bg-brand-navy-light px-8 py-3 text-lg">
-                Contact Us
-              </Badge>
+            <Link href="/quiz">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white text-white hover:bg-white/10 font-semibold px-8"
+              >
+                Take Free Quiz
+              </Button>
             </Link>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
     </div>
   )
 }
