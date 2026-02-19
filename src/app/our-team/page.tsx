@@ -13,15 +13,20 @@ export const metadata = {
 }
 
 async function getLeaders() {
-  const supabase = createClient()
-  const { data } = await supabase
-    .from('advisor')
-    .select('*')
-    .eq('is_active', true)
-    .eq('is_leadership', true)
-    .order('display_order', { ascending: true, nullsFirst: false })
-    .order('name', { ascending: true })
-  return (data as Advisor[] | null) ?? []
+  try {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('advisor')
+      .select('*')
+      .eq('is_active', true)
+      .eq('is_leadership', true)
+      .order('display_order', { ascending: true, nullsFirst: false })
+      .order('name', { ascending: true })
+    return (data as Advisor[] | null) ?? []
+  } catch (error) {
+    console.error('LeadershipTeamPage: failed to fetch leaders.', error)
+    return []
+  }
 }
 
 const values = [

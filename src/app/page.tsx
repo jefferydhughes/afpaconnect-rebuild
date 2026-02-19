@@ -82,30 +82,38 @@ const painPoints = [
 ]
 
 export default async function HomePage() {
-  const supabase = createClient()
-  const cookieStore = cookies()
-  const lastQuizResultId = cookieStore.get('afpa_last_quiz_result_id')?.value?.trim() || null
-  const hasSavedMatches =
-    Boolean(lastQuizResultId) &&
-    isUuid(lastQuizResultId as string) &&
-    (await quizResultExists(supabase, lastQuizResultId as string))
-  const matchesHref = hasSavedMatches
-    ? `/quiz/results?id=${encodeURIComponent(lastQuizResultId as string)}`
-    : '/quiz'
-
-  // Fetch display name for personalized hero
+  let featuredFranchises: any[] | null = null
   let displayName: string | null = null
-  if (hasSavedMatches) {
-    displayName = await getQuizDisplayName(supabase, lastQuizResultId as string)
-  }
+  let hasSavedMatches = false
+  let matchesHref = '/quiz'
 
-  // Fetch featured franchises
-  const { data: featuredFranchises } = await supabase
-    .from('franchises')
-    .select('id, name, slug, logo_url, category, initial_investment_min, initial_investment_max')
-    .eq('is_featured', true)
-    .eq('is_active', true)
-    .limit(6)
+  try {
+    const supabase = createClient()
+    const cookieStore = cookies()
+    const lastQuizResultId = cookieStore.get('afpa_last_quiz_result_id')?.value?.trim() || null
+
+    hasSavedMatches =
+      Boolean(lastQuizResultId) &&
+      isUuid(lastQuizResultId as string) &&
+      (await quizResultExists(supabase, lastQuizResultId as string))
+    matchesHref = hasSavedMatches
+      ? `/quiz/results?id=${encodeURIComponent(lastQuizResultId as string)}`
+      : '/quiz'
+
+    if (hasSavedMatches) {
+      displayName = await getQuizDisplayName(supabase, lastQuizResultId as string)
+    }
+
+    const featuredResult = await supabase
+      .from('franchises')
+      .select('id, name, slug, logo_url, category, initial_investment_min, initial_investment_max')
+      .eq('is_featured', true)
+      .eq('is_active', true)
+      .limit(6)
+    featuredFranchises = featuredResult.data
+  } catch (error) {
+    console.error('HomePage: failed to load Supabase-driven sections. Rendering fallback.', error)
+  }
 
   return (
     <div className="flex flex-col">
