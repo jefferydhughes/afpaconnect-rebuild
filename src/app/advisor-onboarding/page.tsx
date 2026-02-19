@@ -40,7 +40,6 @@ const US_STATES = [
 
 export default function AdvisorOnboardingPage() {
   const router = useRouter()
-  const supabase = createClient()
   const [isLoading, setIsLoading] = useState(true)
   const [userName, setUserName] = useState('')
   const [advisorId, setAdvisorId] = useState<string | null>(null)
@@ -72,6 +71,15 @@ export default function AdvisorOnboardingPage() {
 
   useEffect(() => {
     async function checkUser() {
+      let supabase
+      try {
+        supabase = createClient()
+      } catch (error) {
+        console.error('Supabase client initialization failed:', error)
+        setIsLoading(false)
+        return
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         router.push('/login?redirect=/advisor-onboarding')
@@ -173,6 +181,7 @@ export default function AdvisorOnboardingPage() {
     setIsSubmitting(true)
 
     try {
+      const supabase = createClient()
       const payload = {
         name: formData.name,
         title: formData.title || null,
