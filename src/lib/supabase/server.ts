@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { SupabaseDatabase } from '@/types/supabase'
 
@@ -45,40 +46,22 @@ export function createClient() {
 }
 
 // Admin client for server-side operations that need to bypass RLS.
-// Falls back to the anon key with a warning if SUPABASE_SERVICE_ROLE_KEY is not set
-// (e.g. missing from Vercel env vars) so the site doesn't hard-crash.
-// Add SUPABASE_SERVICE_ROLE_KEY to your Vercel environment variables for full admin access.
+// Uses @supabase/supabase-js directly (NOT @supabase/ssr) so it never
+// touches the cookie/session machinery or hits auth/v1/token endpoints.
 export function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY
 
-  if (!supabaseUrl || (!serviceRoleKey && !anonKey)) {
+  if (!supabaseUrl || !serviceRoleKey) {
     throw new Error(
-      'Missing Supabase env vars. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.'
+      'Missing Supabase env vars. NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.'
     )
   }
 
-  if (!serviceRoleKey) {
-    console.warn(
-      '[Supabase] SUPABASE_SERVICE_ROLE_KEY is not set — admin client falling back to anon key. ' +
-      'RLS policies will apply. Add the service role key in Vercel > Settings > Environment Variables.'
-    )
-  }
-
-  return createServerClient<SupabaseDatabase>(
-    supabaseUrl,
-    serviceRoleKey ?? anonKey!,
-    {
-      cookies: {
-        get() { return undefined },
-        set() {},
-        remove() {},
-      },
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  ) as any
+  return createSupabaseJsClient<SupabaseDatabase>(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }) as any
 }
