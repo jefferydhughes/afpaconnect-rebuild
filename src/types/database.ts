@@ -580,6 +580,68 @@ export interface Database {
           updated_at?: string
         }
       }
+      location_pages: {
+        Row: {
+          id: string
+          brand: string
+          brand_slug: string
+          city: string
+          city_slug: string
+          province: string | null
+          country: string
+          slug: string
+          status: string
+          meta_title: string | null
+          meta_description: string | null
+          population: number | null
+          market_size: string | null
+          ai_generated_content: string | null
+          unique_selling_points: string[] | null
+          local_info: Json | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          brand: string
+          brand_slug: string
+          city: string
+          city_slug: string
+          province?: string | null
+          country?: string
+          slug: string
+          status?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          population?: number | null
+          market_size?: string | null
+          ai_generated_content?: string | null
+          unique_selling_points?: string[] | null
+          local_info?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          brand?: string
+          brand_slug?: string
+          city?: string
+          city_slug?: string
+          province?: string | null
+          country?: string
+          slug?: string
+          status?: string
+          meta_title?: string | null
+          meta_description?: string | null
+          population?: number | null
+          market_size?: string | null
+          ai_generated_content?: string | null
+          unique_selling_points?: string[] | null
+          local_info?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Functions: {
       match_franchises: {
@@ -620,3 +682,4 @@ export type ExperienceLevel = NonNullable<QuizResult['experience_level']>
 export type LeadStatus = Lead['status']
 export type Advisor = Database['public']['Tables']['advisor']['Row']
 export type AdvisorApplication = Database['public']['Tables']['advisor_applications']['Row']
+export type LocationPage = Database['public']['Tables']['location_pages']['Row']

@@ -11,7 +11,8 @@ import {
   LogOut,
   Target,
   Mail,
-  Briefcase
+  Briefcase,
+  MapPin,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -36,6 +37,7 @@ const adminNavItems = [
   { href: '/dashboard/admin/advisors', label: 'Advisors', icon: Briefcase },
   { href: '/dashboard/admin/leads', label: 'Leads', icon: Mail },
   { href: '/dashboard/admin/quizzes', label: 'Quiz Results', icon: FileText },
+  { href: '/dashboard/admin/location-pages', label: 'Location Pages', icon: MapPin },
   { href: '/dashboard/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/admin/settings', label: 'Settings', icon: Settings },
 ]
