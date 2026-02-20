@@ -12,7 +12,7 @@ export default async function AdvisorAiToolsPage() {
   const allFranchiseIds = Array.from(new Set((quizResults ?? []).flatMap((qr) => (qr.matched_franchises as string[] | null) ?? [])))
   let franchisesMap: Record<string, any> = {}
   if (allFranchiseIds.length > 0) {
-    const { data: franchises } = await supabase.from('franchises').select('id, name, category, slug, logo_url, initial_investment_min, initial_investment_max').in('id', allFranchiseIds)
+    const { data: franchises } = await supabase.from('franchise').select('id, name, category, slug, logo_url, initial_investment_min, initial_investment_max').in('id', allFranchiseIds)
     franchisesMap = (franchises ?? []).reduce((acc, f) => { acc[f.id] = f; return acc }, {} as Record<string, any>)
   }
   const candidates = (quizResults ?? []).map((qr) => {

@@ -95,12 +95,12 @@ export default function FranchiseForm({ franchise }: { franchise?: FranchiseRow 
     setSaving(true)
     try {
       if (isNew) {
-        const { error } = await supabase.from('franchises').insert(data)
+        const { error } = await supabase.from('franchise').insert(data)
         if (error) throw error
         toast.success('Franchise created!')
       } else {
         const { error } = await supabase
-          .from('franchises')
+          .from('franchise')
           .update(data)
           .eq('id', franchise!.id!)
         if (error) throw error

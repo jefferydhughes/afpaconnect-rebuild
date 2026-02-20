@@ -15,7 +15,7 @@ export default async function EditFranchisePage({
 
   const adminSupabase = createAdminClient()
   const { data: franchise } = await adminSupabase
-    .from('franchises')
+    .from('franchise')
     .select('*')
     .eq('id', params.id)
     .single()

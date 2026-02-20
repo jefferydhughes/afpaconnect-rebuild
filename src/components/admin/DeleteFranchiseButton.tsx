@@ -20,7 +20,7 @@ export default function DeleteFranchiseButton({
   async function handleDelete() {
     setDeleting(true)
     const supabase = createClient()
-    const { error } = await supabase.from('franchises').delete().eq('id', id)
+    const { error } = await supabase.from('franchise').delete().eq('id', id)
     if (error) {
       toast.error('Failed to delete: ' + error.message)
       setDeleting(false)

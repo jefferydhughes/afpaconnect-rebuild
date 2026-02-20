@@ -31,7 +31,7 @@ async function getFranchisorData(userId: string) {
     .single()
 
   const { data: franchises } = await supabase
-    .from('franchises')
+    .from('franchise')
     .select('*')
     .eq('owner_id', userId)
     .order('created_at', { ascending: false })

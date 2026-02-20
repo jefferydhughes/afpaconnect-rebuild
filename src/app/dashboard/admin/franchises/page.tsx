@@ -17,7 +17,7 @@ async function getFranchises(supabase: any, search?: string, page = 1) {
   const to = from + pageSize - 1
 
   let query = supabase
-    .from('franchises')
+    .from('franchise')
     .select('*', { count: 'exact' })
     .order('name')
     .range(from, to)

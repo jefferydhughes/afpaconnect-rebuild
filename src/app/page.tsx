@@ -107,7 +107,7 @@ export default async function HomePage() {
     }
 
     const featuredResult = await supabase
-      .from('franchises')
+      .from('franchise')
       .select('id, name, slug, logo_url, category, initial_investment_min, initial_investment_max')
       .eq('is_featured', true)
       .eq('is_active', true)

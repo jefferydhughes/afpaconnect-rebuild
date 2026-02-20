@@ -31,7 +31,7 @@ async function getAdminData() {
     { count: leadCount },
     { count: newLeadCount },
   ] = await Promise.all([
-    supabase.from('franchises').select('*', { count: 'exact', head: true }).eq('is_active', true),
+    supabase.from('franchise').select('*', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'advisor'),
     supabase.from('quiz_results').select('*', { count: 'exact', head: true }),

@@ -49,7 +49,7 @@ async function getDashboardData(userId: string, userEmail: string) {
   let matchedFranchises: any[] = []
   if (quizResults && quizResults.length > 0 && quizResults[0].matched_franchises) {
     const { data: franchises } = await supabase
-      .from('franchises')
+      .from('franchise')
       .select('*')
       .in('id', quizResults[0].matched_franchises.slice(0, 6))
 
