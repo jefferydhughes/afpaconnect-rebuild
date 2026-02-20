@@ -2,9 +2,13 @@ import { createAdminClient } from '@/lib/supabase/server'
 import type { Advisor } from '@/types/database'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Award, Linkedin, Star, Target, TrendingUp, Users } from 'lucide-react'
+import { Award, CalendarDays, Linkedin, Star, Target, TrendingUp, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+
+function toSlug(name: string | null): string {
+  return (name ?? '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
 
 export const metadata = {
   title: 'Leadership Team | AFPA Connect',
@@ -115,11 +119,21 @@ export default async function LeadershipTeamPage() {
                       </div>
                     )}
 
-                    <Link href={`/advisors/${leader.id}`}>
-                      <Button className="w-full bg-brand-navy text-brand-gold hover:bg-brand-navy-light py-5 text-base font-semibold">
-                        View Profile
-                      </Button>
-                    </Link>
+                    <div className="flex flex-col gap-2">
+                      <Link href={`/advisors/${toSlug(leader.name)}`}>
+                        <Button className="w-full bg-brand-navy text-brand-gold hover:bg-brand-navy-light py-5 text-base font-semibold">
+                          View Profile
+                        </Button>
+                      </Link>
+                      {leader.calendar_embed_code && (
+                        <Link href={`/advisors/${toSlug(leader.name)}#calendar`}>
+                          <Button variant="outline" className="w-full py-5 text-base font-semibold border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white">
+                            <CalendarDays className="w-4 h-4 mr-2" />
+                            Schedule a Call
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}

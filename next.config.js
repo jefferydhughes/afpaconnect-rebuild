@@ -26,6 +26,26 @@ const nextConfig = {
         destination: '/directory',
         permanent: true,
       },
+      // Old consultantpage → new SEO-friendly advisor profile
+      // e.g. /consultantpage?name=jozette-wright → /advisors/jozette-wright
+      {
+        source: '/consultantpage',
+        has: [{ type: 'query', key: 'name', value: '(?<name>.+)' }],
+        destination: '/advisors/:name',
+        permanent: true,
+      },
+      {
+        source: '/consultantpage',
+        destination: '/advisors',
+        permanent: true,
+      },
+      // Old advisorpage with name param → new slug URL
+      {
+        source: '/advisorpage',
+        has: [{ type: 'query', key: 'name', value: '(?<name>.+)' }],
+        destination: '/advisors/:name',
+        permanent: true,
+      },
     ]
   },
 }

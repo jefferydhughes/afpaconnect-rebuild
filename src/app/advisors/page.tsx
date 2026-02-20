@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import type { Advisor } from '@/types/database'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -16,8 +16,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
+function toSlug(name: string | null): string {
+  return (name ?? '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+}
+
 async function getAdvisors() {
-  const supabase = createClient()
+  const supabase = createAdminClient()
 
   const { data: advisorsData } = await supabase
     .from('advisor')
@@ -177,8 +181,13 @@ export default async function AdvisorsPage() {
                   )}
 
                   <div className="flex gap-2">
+                    <Link href={`/advisors/${toSlug(advisor.name)}`} className="flex-1">
+                      <Button variant="outline" className="w-full border-brand-navy text-brand-navy hover:bg-brand-navy hover:text-white">
+                        View Profile
+                      </Button>
+                    </Link>
                     {advisor.calendar_embed_code ? (
-                      <Link href={`/advisors/${advisor.id}`} className="flex-1">
+                      <Link href={`/advisors/${toSlug(advisor.name)}#calendar`} className="flex-1">
                         <Button className="w-full bg-brand-navy text-brand-gold hover:bg-brand-navy-light">
                           <Calendar className="mr-2 h-4 w-4" />
                           Schedule Call
