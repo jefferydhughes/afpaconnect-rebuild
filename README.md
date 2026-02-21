@@ -157,23 +157,33 @@ All quiz submissions from these links are attributed to the advisor in:
 
 ```
 src/
-├── app/                    # Next.js App Router pages
-│   ├── api/               # API routes
-│   │   └── quiz/          # Quiz submission endpoint
-│   ├── directory/         # Franchise directory
-│   ├── quiz/              # Quiz and results pages
-│   └── page.tsx           # Homepage
-├── components/
-│   ├── layout/            # Header, Footer
-│   ├── providers/         # React Query, etc.
-│   └── ui/                # shadcn/ui components
-├── lib/
-│   ├── supabase/          # Supabase clients
-│   └── utils.ts           # Utility functions
-└── types/
-    └── database.ts        # TypeScript types
+|-- app/                     # Next.js App Router pages and route handlers
+|   |-- api/                 # Backend API routes (quiz, auth, admin, leads, etc.)
+|   |-- dashboard/           # Admin/advisor dashboard pages
+|   |-- directory/           # Franchise directory pages
+|   |-- quiz/                # Quiz flow and results pages
+|   |-- [many marketing pages: about, blog, contact, guides, regions...]
+|   |-- layout.tsx
+|   |-- not-found.tsx
+|   |-- page.tsx             # Homepage
+|   `-- sitemap.ts
+|-- components/
+|   |-- admin/               # Admin UI blocks
+|   |-- advisor/             # Advisor-specific components
+|   |-- assessment/          # Fit/assessment UI
+|   |-- demo/                # Demo components
+|   |-- directory/           # Directory UI components
+|   |-- heatmap/             # Heatmap visualization components
+|   |-- home/                # Homepage sections
+|   |-- layout/              # Header, Footer, navigation
+|   |-- providers/           # React context/providers
+|   `-- ui/                  # Shared shadcn/ui primitives
+|-- lib/
+|   `-- supabase/            # Browser/server/middleware Supabase clients
+`-- types/
+    |-- database.ts          # Generated DB types
+    `-- supabase.ts          # App-level Supabase typing helpers
 ```
-
 ---
 
 ## Database Schema
@@ -238,3 +248,4 @@ For issues or questions:
 ## License
 
 Private - All rights reserved.
+
