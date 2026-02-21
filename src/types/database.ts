@@ -580,6 +580,91 @@ export interface Database {
           updated_at?: string
         }
       }
+      fit360_response: {
+        Row: {
+          id: string
+          user_id: string | null
+          email: string | null
+          question: string | null
+          selected_option: string | null
+          trait: string | null
+          dimension: string | null
+          score: number | null
+          question_index: number | null
+          session_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          email?: string | null
+          question?: string | null
+          selected_option?: string | null
+          trait?: string | null
+          dimension?: string | null
+          score?: number | null
+          question_index?: number | null
+          session_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          email?: string | null
+          question?: string | null
+          selected_option?: string | null
+          trait?: string | null
+          dimension?: string | null
+          score?: number | null
+          question_index?: number | null
+          session_id?: string | null
+          created_at?: string
+        }
+      }
+      fit360_profile: {
+        Row: {
+          id: string
+          user_id: string | null
+          email: string | null
+          session_id: string | null
+          trait_scores: Json | null
+          dimension_summary: Json | null
+          top_traits: string[] | null
+          profile_strengths: string[] | null
+          completion_rate: number | null
+          total_questions: number | null
+          franchise_compatibility: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          email?: string | null
+          session_id?: string | null
+          trait_scores?: Json | null
+          dimension_summary?: Json | null
+          top_traits?: string[] | null
+          profile_strengths?: string[] | null
+          completion_rate?: number | null
+          total_questions?: number | null
+          franchise_compatibility?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          email?: string | null
+          session_id?: string | null
+          trait_scores?: Json | null
+          dimension_summary?: Json | null
+          top_traits?: string[] | null
+          profile_strengths?: string[] | null
+          completion_rate?: number | null
+          total_questions?: number | null
+          franchise_compatibility?: Json | null
+          created_at?: string
+        }
+      }
       location_pages: {
         Row: {
           id: string
@@ -683,3 +768,5 @@ export type LeadStatus = Lead['status']
 export type Advisor = Database['public']['Tables']['advisor']['Row']
 export type AdvisorApplication = Database['public']['Tables']['advisor_applications']['Row']
 export type LocationPage = Database['public']['Tables']['location_pages']['Row']
+export type Fit360Response = Database['public']['Tables']['fit360_response']['Row']
+export type Fit360Profile = Database['public']['Tables']['fit360_profile']['Row']
