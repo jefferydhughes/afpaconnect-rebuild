@@ -13,6 +13,7 @@ import {
   Mail,
   Briefcase,
   MapPin,
+  BookOpen,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -40,6 +41,7 @@ const adminNavItems = [
   { href: '/dashboard/admin/location-pages', label: 'Location Pages', icon: MapPin },
   { href: '/dashboard/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/admin/settings', label: 'Settings', icon: Settings },
+  { href: '/dashboard/admin/docs', label: 'Platform Guide', icon: BookOpen },
 ]
 
 // advisor — franchise consultant who earns via referrals
