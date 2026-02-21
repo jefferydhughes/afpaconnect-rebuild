@@ -24,6 +24,7 @@ const navigation = [
       { name: 'Blog', href: '/blog' },
       { name: 'FAQ', href: '/faq' },
       { name: 'Investment Calculator', href: '/calculator' },
+      { name: 'Become an Advisor', href: '/become-advisor' },
     ],
   },
   { name: 'Find an Advisor', href: '/advisors' },

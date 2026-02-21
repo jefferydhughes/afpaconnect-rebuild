@@ -11,12 +11,12 @@ const footerLinks = {
     { name: 'Franchise Guide', href: '/guide' },
     { name: 'Blog', href: '/blog' },
     { name: 'FAQ', href: '/faq' },
-     ],
+    { name: 'Become an Advisor', href: '/become-advisor' },
+  ],
   company: [
     { name: 'About Us', href: '/about' },
     { name: 'Our Team', href: '/our-team' },
     { name: 'Contact', href: '/contact' },
-    { name: 'Become an Advisor', href: '/become-advisor' },
     { name: 'Submit Support Ticket', href: 'https://api.leadconnectorhq.com/widget/form/c2zHm8pcf4gDc12v8iQS' },
   ],
   legal: [
