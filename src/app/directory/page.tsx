@@ -10,23 +10,11 @@ import { Input } from '@/components/ui/input'
 import FranchiseCard from '@/components/directory/FranchiseCard'
 import RequestInfoModal from '@/components/directory/RequestInfoModal'
 import FloatingCompareButton from '@/components/directory/FloatingCompareButton'
+import { FRANCHISE_CATEGORIES } from '@/lib/franchise-categories'
 
 const CATEGORIES = [
   { value: 'all', label: 'All Categories' },
-  { value: 'food_beverage', label: 'Food & Beverage' },
-  { value: 'home_services', label: 'Home Services' },
-  { value: 'health_wellness', label: 'Health & Wellness' },
-  { value: 'automotive', label: 'Automotive' },
-  { value: 'business_services', label: 'Business Services' },
-  { value: 'retail', label: 'Retail' },
-  { value: 'childrens_services', label: "Children's Services" },
-  { value: 'fitness', label: 'Fitness' },
-  { value: 'technology', label: 'Technology' },
-  { value: 'senior_care', label: 'Senior Care' },
-  { value: 'cleaning', label: 'Cleaning' },
-  { value: 'pet_services', label: 'Pet Services' },
-  { value: 'education', label: 'Education' },
-  { value: 'beauty', label: 'Beauty & Spa' },
+  ...FRANCHISE_CATEGORIES,
 ]
 
 const INVESTMENT_RANGES = [

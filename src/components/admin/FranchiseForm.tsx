@@ -11,14 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Loader2, Save, ArrowLeft, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
-
-const CATEGORIES = [
-  'food_and_beverage', 'home_services', 'health_and_fitness', 'automotive',
-  'business_services', 'education', 'retail', 'cleaning_services',
-  'senior_care', 'real_estate', 'beauty_and_wellness', 'entertainment',
-  'pet_services', 'financial_services', 'technology', 'staffing',
-  'travel', 'fitness', 'other',
-]
+import { FRANCHISE_CATEGORIES, toCategorySlug } from '@/lib/franchise-categories'
 
 const TABS = ['Basic Info', 'Financial', 'Ops & Matching', 'Listing Page'] as const
 type Tab = typeof TABS[number]
@@ -77,6 +70,8 @@ export default function FranchiseForm({ franchise }: { franchise?: FranchiseRow 
   const [tab, setTab] = useState<Tab>('Basic Info')
   const [saving, setSaving] = useState(false)
   const [data, setData] = useState<FranchiseRow>(franchise ?? empty)
+  const [addingCategory, setAddingCategory] = useState(false)
+  const [newCategoryInput, setNewCategoryInput] = useState('')
 
   function set(field: keyof FranchiseRow, value: unknown) {
     setData(prev => ({ ...prev, [field]: value }))
@@ -163,16 +158,68 @@ export default function FranchiseForm({ franchise }: { franchise?: FranchiseRow 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <Label>Category *</Label>
-              <select
-                value={data.category}
-                onChange={e => set('category', e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy"
-              >
-                <option value="">Select category</option>
-                {CATEGORIES.map(c => (
-                  <option key={c} value={c}>{c.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>
-                ))}
-              </select>
+              {addingCategory ? (
+                <div className="flex gap-2 items-center">
+                  <Input
+                    autoFocus
+                    placeholder="e.g. Pet Care"
+                    value={newCategoryInput}
+                    onChange={e => setNewCategoryInput(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        const slug = toCategorySlug(newCategoryInput)
+                        if (slug) { set('category', slug); setAddingCategory(false); setNewCategoryInput('') }
+                      }
+                      if (e.key === 'Escape') { setAddingCategory(false); setNewCategoryInput('') }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      const slug = toCategorySlug(newCategoryInput)
+                      if (slug) { set('category', slug); setAddingCategory(false); setNewCategoryInput('') }
+                    }}
+                    className="shrink-0 bg-brand-navy text-brand-gold"
+                  >
+                    Add
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setAddingCategory(false); setNewCategoryInput('') }}
+                    className="shrink-0"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <select
+                  value={data.category}
+                  onChange={e => {
+                    if (e.target.value === '__add_new__') {
+                      setAddingCategory(true)
+                    } else {
+                      set('category', e.target.value)
+                    }
+                  }}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy"
+                >
+                  <option value="">Select category</option>
+                  {FRANCHISE_CATEGORIES.map(c => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                  {/* Show current value if it's a custom slug not in the list */}
+                  {data.category && !FRANCHISE_CATEGORIES.find(c => c.value === data.category) && (
+                    <option value={data.category}>
+                      {data.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </option>
+                  )}
+                  <option value="__add_new__">＋ Add new category…</option>
+                </select>
+              )}
             </div>
             <div>
               <Label>Established Year</Label>

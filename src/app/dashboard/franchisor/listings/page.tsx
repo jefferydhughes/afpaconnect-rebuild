@@ -23,7 +23,7 @@ export default async function FranchisorListingsPage() {
   let franchise = null
   if (profile?.associated_franchise_id) {
     const { data } = await admin
-      .from('franchises')
+      .from('franchise')
       .select('*')
       .eq('id', profile.associated_franchise_id)
       .single()

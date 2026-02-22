@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { getCategoryLabel as getCategoryLabelFromConstants } from '@/lib/franchise-categories'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -73,9 +74,7 @@ export function getBudgetRangeLabel(range: string): string {
 }
 
 export function getCategoryLabel(category: string): string {
-  return category
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (l) => l.toUpperCase())
+  return getCategoryLabelFromConstants(category)
 }
 
 export function getBusinessModelLabel(model: string): string {

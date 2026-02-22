@@ -27,7 +27,7 @@ export default async function EditListingPage({ params }: { params: { id: string
 
   // Fetch full franchise data
   const { data: franchise, error } = await admin
-    .from('franchises')
+    .from('franchise')
     .select('*')
     .eq('id', params.id)
     .single()
