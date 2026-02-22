@@ -24,7 +24,7 @@ export default async function FranchisorListingsPage() {
   if (profile?.associated_franchise_id) {
     const { data } = await admin
       .from('franchises')
-      .select('id, name, slug, description, logo_url, is_active, is_featured, listing_plan, category')
+      .select('*')
       .eq('id', profile.associated_franchise_id)
       .single()
     franchise = data
