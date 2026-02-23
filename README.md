@@ -67,6 +67,10 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 OPENAI_API_KEY=sk-your-openai-key
+RESEND_API_KEY=re_xxxxxxxxx
+AFPA_EMAIL_FROM="AFPAConnect Notifications <notifications@yourdomain.com>"
+AFPA_DEFAULT_ADMIN_EMAIL=admin@yourdomain.com
+NEXT_PUBLIC_SITE_URL=https://yourdomain.com
 ```
 
 ### 4. Import Franchise Data
@@ -103,6 +107,10 @@ Open [http://localhost:3000](http://localhost:3000)
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `OPENAI_API_KEY`
+   - `RESEND_API_KEY`
+   - `AFPA_EMAIL_FROM`
+   - `AFPA_DEFAULT_ADMIN_EMAIL`
+   - `NEXT_PUBLIC_SITE_URL`
 4. Deploy!
 
 ### Connecting Your Domain

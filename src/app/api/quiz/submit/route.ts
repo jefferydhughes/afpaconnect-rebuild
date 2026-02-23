@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import {
+  sendQuizAdminNotificationEmail,
+  sendQuizUserConfirmationEmail,
+} from '@/lib/notifications/email'
 import OpenAI from 'openai'
 import { z } from 'zod'
 
@@ -257,6 +261,28 @@ export async function POST(request: NextRequest) {
 
     sendQuizResultWebhook(webhookPayload).catch((error) => {
       console.error('Quiz webhook failed (non-blocking):', error)
+    })
+
+    sendQuizUserConfirmationEmail({
+      to: normalizedContact.email,
+      firstName: normalizedContact.firstName || null,
+      matchCount: matches.length,
+      quizId: (quizResult as any).quiz_id || generatedQuizId,
+    }).catch((error) => {
+      console.error('User quiz confirmation email failed (non-blocking):', error)
+    })
+
+    sendQuizAdminNotificationEmail({
+      to: adminNotificationEmail,
+      submittedEmail: normalizedContact.email,
+      submittedName:
+        [normalizedContact.firstName, normalizedContact.lastName].filter(Boolean).join(' ').trim() || null,
+      source: normalizedSource,
+      budgetRange: budget || null,
+      matchCount: matches.length,
+      quizId: (quizResult as any).quiz_id || generatedQuizId,
+    }).catch((error) => {
+      console.error('Admin quiz notification email failed (non-blocking):', error)
     })
 
     if (!normalizedIncomingAdvisorId) {

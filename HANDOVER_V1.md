@@ -231,6 +231,9 @@ npm run start
 | `SUPABASE_SERVICE_ROLE_KEY` | Privileged server operations | Recommended for admin APIs |
 | `OPENAI_API_KEY` | AI matching/generation | Required for AI features |
 | `AFPA_DEFAULT_ADMIN_EMAIL` / `ADMIN_EMAIL` | Default admin contact fallback | Optional |
+| `RESEND_API_KEY` | Enables direct outbound email notifications | Optional (required for direct email) |
+| `AFPA_EMAIL_FROM` / `EMAIL_FROM` | Sender identity for notification emails | Optional |
+| `NEXT_PUBLIC_SITE_URL` / `SITE_URL` | Base URL used in email links | Optional |
 | `AFPA_QUIZ_WEBHOOK_URL` | Quiz webhook integration endpoint | Optional |
 | `AFPA_QUIZ_WEBHOOK_APIKEY` / `AFPA_QUIZ_WEBHOOK_BEARER` | Webhook auth | Optional |
 | `AFPA_QUIZ_NOTIFICATION_WEBHOOK_URL` | Notification webhook endpoint | Optional |
