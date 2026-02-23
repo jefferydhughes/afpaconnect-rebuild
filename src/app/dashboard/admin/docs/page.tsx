@@ -5,7 +5,7 @@ import {
   MapPin, Briefcase, FlaskConical, ChevronRight, ExternalLink,
   CheckCircle, AlertTriangle, Info, Database, Key, Globe,
   UserCheck, PlusCircle, Pencil, Trash2, Eye, RefreshCw,
-  ShieldCheck, HelpCircle,
+  ShieldCheck, HelpCircle, PlayCircle, Plug,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -46,7 +46,7 @@ const sections: Section[] = [
       { action: 'Edit an existing franchise', detail: 'Click any franchise row to open the edit view. Update any field and save. Changes are live immediately.' },
       { action: 'Activate / deactivate a listing', detail: 'Toggle the "is_active" field. Inactive listings are hidden from the public /directory page but remain in the database.' },
       { action: 'Delete a franchise', detail: 'Use the delete button on the franchise detail page. This permanently removes the record and cannot be undone.', warning: 'Deleting a franchise also removes it from any saved quiz match results and lead associations.' },
-      { action: 'Add a Franchisor account', detail: 'First create the franchise listing. Then go to Users, find the user, and change their role to "franchisor" in Supabase. The associated_franchise_id on their profile should match the franchise record ID.' },
+      { action: 'Add a Franchisor account', detail: 'First create the franchise listing. Then go to Users, click the ⋯ menu next to the user\'s row, and select "Edit User". Change their role to "franchisor" and use the franchise search box to associate them with their brand. No Supabase access required.' },
     ],
   },
   {
@@ -58,7 +58,7 @@ const sections: Section[] = [
     description: 'Manage user accounts and assign platform roles.',
     steps: [
       { action: 'View all users', detail: 'Go to Users to see every registered account with their email, role, and sign-up date.' },
-      { action: 'Change a user\'s role', detail: 'Roles are set in the Supabase dashboard → Table Editor → profiles → find the user row → edit the "role" column. Valid roles: admin, advisor, franchisor, franchise_rep, user.', note: 'Role changes take effect on the user\'s next page load or login.' },
+      { action: 'Change a user\'s role', detail: 'Click the ⋯ menu next to any user row and select "Edit User". The dialog lets you change their full name, role, and (for franchisor/franchise_rep roles) associate them with a franchise brand via a live search box. Save to apply immediately.', note: 'Role changes take effect on the user\'s next page load or login.' },
       { action: 'The 5 platform roles', detail: 'admin: full platform access. advisor: manages their own lead pipeline. franchisor: manages their brand listing and sees its leads. franchise_rep: handles applications for a specific brand. user: prospective franchisee (default after signup).' },
       { action: 'Reset a user password', detail: 'Go to Supabase dashboard → Authentication → Users → find the user → click "Send password reset email".' },
       { action: 'Delete a user', detail: 'In Supabase → Authentication → Users → select the user → Delete. This also removes their profile row due to the cascade trigger.', warning: 'Deletion is permanent. Their leads and quiz results remain but will show a null user_id.' },
@@ -168,6 +168,37 @@ const sections: Section[] = [
     ],
   },
   {
+    id: 'analytics-integrations',
+    title: 'Analytics Integrations',
+    icon: Plug,
+    color: 'bg-cyan-600',
+    href: '/dashboard/franchisor/analytics',
+    description: 'Connect Google My Business, Meta Ads, Google Ads, Google Analytics, and LinkedIn to the franchisor analytics dashboard.',
+    steps: [
+      { action: 'How platform connections work', detail: 'Each franchisor can connect their own marketing platforms via OAuth. Connected accounts sync metrics into the platform_connections, gmb_metrics, ad_campaign_metrics, and website_traffic_metrics tables in Supabase. Data is displayed in the Franchisor Analytics dashboard.' },
+      { action: 'Connect a platform (franchisor)', detail: 'In the Franchisor dashboard → Analytics → Connections tab, click "Connect" on any platform card. You will be redirected to that platform\'s OAuth consent screen, then returned to the dashboard with the connection active.' },
+      { action: 'Google platforms setup (admin/developer task)', detail: 'Google My Business, Google Ads, and Google Analytics connections require GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET in your .env.local (and Vercel env vars for production). Authorized redirect URIs must be added in Google Cloud Console for each environment.', note: 'Redirect URIs follow the pattern: http://localhost:8080/api/analytics/callback/google_my_business (one per platform, replace the platform slug and domain for production).' },
+      { action: 'Meta Ads setup', detail: 'Requires META_APP_ID and META_APP_SECRET in environment variables. Add the callback URL to your Meta App\'s Valid OAuth Redirect URIs in the Facebook Developer Console.' },
+      { action: 'Sync data manually', detail: 'In the Connections tab, click the sync icon on any connected platform card to pull the latest data immediately. The dashboard auto-refreshes after a sync completes.' },
+      { action: 'Disconnect a platform', detail: 'Click the disconnect button on the platform card in the Connections tab. This clears the stored tokens and sets the connection status to "disconnected". The historical metric rows are retained in the database.' },
+      { action: 'Platform not connecting?', detail: 'Check that the environment variables are set correctly and the OAuth redirect URI registered in the provider console exactly matches the callback URL (including http vs https, port, and path).', warning: 'If META_APP_ID or LINKEDIN_CLIENT_ID are not yet configured, those platform connect buttons will still appear but the OAuth flow will fail gracefully and redirect back to the analytics page.' },
+    ],
+  },
+  {
+    id: 'onboarding-tour',
+    title: 'Onboarding Tour',
+    icon: PlayCircle,
+    color: 'bg-emerald-600',
+    description: 'Role-based guided tours that walk new users through their dashboard on first login.',
+    steps: [
+      { action: 'How the tour works', detail: 'When a user logs in for the first time (per device), an Intro.js tooltip tour launches automatically after a short delay. The tour is role-specific — each of the 5 roles (admin, advisor, franchisor, franchise_rep, user) has its own set of steps defined in public/tours.json.' },
+      { action: 'Tour only runs once', detail: 'Completion is tracked in localStorage under the key tour_completed_<role>. Once the tour is completed or dismissed (skip / Esc), it does not run again on that browser. Clearing localStorage or using a different device will trigger it again.' },
+      { action: 'Replay the tour', detail: 'Users can replay the tour any time by going to their Settings page and clicking the "Replay Onboarding Tour" button. Admins can replay it from the Admin Settings page. The button clears the localStorage flag and reloads the page.' },
+      { action: 'Edit tour content (admin/developer task)', detail: 'Open public/tours.json. Each role key contains a "steps" array. Each step has: title (bold header), intro (body text — HTML allowed), element (CSS selector for the element to highlight, or null for a centred tooltip), and optional position ("top" | "bottom" | "left" | "right").', note: 'If the CSS selector in "element" matches nothing on the page, the tooltip floats in the centre of the viewport — this is intentional for intro/outro steps.' },
+      { action: 'Add a tour for a new section', detail: 'Find the appropriate role in tours.json and add a new step object to its "steps" array. Use your browser\'s DevTools to find the CSS selector for the element you want to highlight. Selectors like aside nav a[href=\'/dashboard/admin/page\'] work well for sidebar links.' },
+    ],
+  },
+  {
     id: 'technical',
     title: 'Technical Reference',
     icon: Database,
@@ -178,8 +209,8 @@ const sections: Section[] = [
       { action: 'Environment variables', detail: 'NEXT_PUBLIC_SUPABASE_URL — your Supabase project URL. NEXT_PUBLIC_SUPABASE_ANON_KEY — public anon key for browser client. SUPABASE_SERVICE_ROLE_KEY — server-only key with full DB access (never expose to browser).', warning: 'The service role key bypasses all Row Level Security. Keep it server-side only.' },
       { action: 'Database access', detail: 'Log into supabase.com → your project → Table Editor for GUI-based data management. Use SQL Editor for bulk operations. All major tables: profiles, franchise, leads, quiz_results, advisor, fit360_profile, fit360_response, location_pages.' },
       { action: 'Deploying updates', detail: 'Push to the main branch on GitHub. Vercel auto-deploys on every merge. Preview deployments are created for every pull request. Check the Vercel dashboard for build logs if a deploy fails.' },
-      { action: 'Running database migrations', detail: 'New migrations are in /supabase/migrations/. Open each .sql file and paste the contents into the Supabase SQL Editor to run them. Do this in chronological order when setting up a new environment.' },
-      { action: 'Adding a new franchise category', detail: 'Update the category enum in Supabase (supabase → Database → Enumerations or the franchise table column), then update the category options in src/components/admin/FranchiseForm.tsx and src/app/directory/page.tsx.' },
+      { action: 'Running database migrations', detail: 'New migrations are in /supabase/migrations/. Open each .sql file and paste the contents into the Supabase SQL Editor to run them. Do this in chronological order when setting up a new environment. Recent migrations: fix_associated_franchise_id_type.sql (changes associated_franchise_id to TEXT), franchise_active_default.sql (sets all franchises active by default), analytics_tables.sql (creates platform_connections and metric tables).' },
+      { action: 'Adding a new franchise category', detail: 'Edit src/lib/franchise-categories.ts — this is the single source of truth for all categories. Add a new { value, label } entry to the FRANCHISE_CATEGORIES array. The admin form, directory page, and all display helpers automatically pick up the change. You can also add categories on the fly in the admin Franchise form via the "＋ Add new category…" option.', note: 'The value field should be snake_case (e.g. "home_services"). The label is the human-readable name shown in the UI.' },
     ],
   },
 ]
