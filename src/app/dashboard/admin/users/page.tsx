@@ -43,11 +43,13 @@ export default async function AdminUsersPage({
   const users = await getUsers(searchParams.search)
 
   // Collect all unique franchise IDs so we can show names in the table
-  const franchiseIds = Array.from(new Set(
-    users
-      .map((u) => u.associated_franchise_id)
-      .filter((id): id is string => !!id)
-  ))
+  const franchiseIds: string[] = Array.from(
+    new Set(
+      users
+        .map((u: { associated_franchise_id?: unknown }) => u.associated_franchise_id)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0)
+    )
+  )
   const franchiseNames = await getFranchiseNames(franchiseIds)
 
   const stats = {

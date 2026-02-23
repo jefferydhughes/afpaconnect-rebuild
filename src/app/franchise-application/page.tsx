@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -50,7 +50,7 @@ const initialForm: FormState = {
   business_goals: '',
 }
 
-export default function FranchiseApplicationPage() {
+function FranchiseApplicationForm() {
   const searchParams = useSearchParams()
   const [franchises, setFranchises] = useState<FranchiseOption[]>([])
   const [form, setForm] = useState<FormState>(initialForm)
@@ -313,5 +313,17 @@ export default function FranchiseApplicationPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function FranchiseApplicationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 py-10 px-4">
+        <div className="max-w-3xl mx-auto text-center text-gray-600">Loading application form...</div>
+      </div>
+    }>
+      <FranchiseApplicationForm />
+    </Suspense>
   )
 }

@@ -25,9 +25,16 @@ interface AdMetric {
   impressions?: number
 }
 
+interface GMBMetric {
+  date: string
+  views_maps?: number
+  views_search?: number
+  actions_phone?: number
+}
+
 interface DashboardData {
   connections: PlatformConnection[]
-  gmb: { metrics: unknown[]; summary: { totalCalls: number; totalDirections: number; totalWebsiteClicks: number; avgDailyViews: number } } | null
+  gmb: { metrics: GMBMetric[]; summary: { totalCalls: number; totalDirections: number; totalWebsiteClicks: number; avgDailyViews: number } } | null
   ads: { metrics: AdMetric[]; summary: { totalSpend: number; totalLeads: number; totalClicks: number; totalImpressions: number; avgCostPerLead: number; avgCTR: number } } | null
   website: { metrics: unknown[]; summary: { totalSessions: number; totalUsers: number; totalPageViews: number; avgBounceRate: number } } | null
   summary: {
