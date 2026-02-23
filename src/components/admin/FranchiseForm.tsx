@@ -30,7 +30,6 @@ type FranchiseRow = {
   franchise_fee: number | null
   royalty_fee_percentage: number | null
   marketing_fee_percentage: number | null
-  liquid_capital_required: number | null
   net_worth_required: number | null
   business_model: string | null
   time_commitment: string | null
@@ -52,7 +51,7 @@ const empty: FranchiseRow = {
   name: '', slug: '', category: '', description: null, full_description: null,
   logo_url: null, website_url: null, initial_investment_min: null,
   initial_investment_max: null, franchise_fee: null, royalty_fee_percentage: null,
-  marketing_fee_percentage: null, liquid_capital_required: null, net_worth_required: null,
+  marketing_fee_percentage: null, net_worth_required: null,
   business_model: null, time_commitment: null, experience_required: false,
   training_duration_weeks: null, support_level: null, total_locations: null,
   usa_locations: null, established_year: null, growth_potential: null,
