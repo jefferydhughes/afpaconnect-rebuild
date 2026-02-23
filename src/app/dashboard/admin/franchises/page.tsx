@@ -89,7 +89,6 @@ export default async function AdminFranchisesPage({
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Franchise</th>
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Category</th>
                   <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Investment</th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -133,14 +132,6 @@ export default async function AdminFranchisesPage({
                       ) : (
                         <span className="text-gray-300">—</span>
                       )}
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge className={franchise.is_active
-                        ? 'bg-green-100 text-green-700 border-0 text-xs'
-                        : 'bg-gray-100 text-gray-500 border-0 text-xs'
-                      }>
-                        {franchise.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-end gap-1">

@@ -2,6 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Intro.js onboarding tour ── */
+@import 'intro.js/introjs.css';
+
+/* Brand-themed overrides for the tour tooltips */
+.afpa-tour-tooltip.introjs-tooltip {
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  max-width: 340px;
+  font-family: inherit;
+}
+
+.introjs-tooltip-header {
+  padding-bottom: 4px;
+}
+
+.introjs-tooltip-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e3a5f; /* brand-navy */
+}
+
+.introjs-tooltiptext {
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* Progress bar */
+.introjs-progressbar {
+  background-color: #c9a84c; /* brand-gold */
+}
+
+/* Buttons */
+.afpa-tour-btn.introjs-button {
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  text-shadow: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.afpa-tour-btn.introjs-nextbutton,
+.afpa-tour-btn.introjs-donebutton {
+  background: #1e3a5f;
+  border-color: #1e3a5f;
+  color: #c9a84c;
+}
+
+.afpa-tour-btn.introjs-nextbutton:hover,
+.afpa-tour-btn.introjs-donebutton:hover {
+  background: #2a4f7f;
+  border-color: #2a4f7f;
+  color: #c9a84c;
+}
+
+.afpa-tour-btn.introjs-skipbutton {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Highlight ring */
+.afpa-tour-highlight.introjs-helperLayer {
+  box-shadow: 0 0 0 4px #c9a84c, 0 0 0 8px rgba(201, 168, 76, 0.2) !important;
+  border-radius: 8px;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

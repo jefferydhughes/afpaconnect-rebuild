@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import TourManager from '@/components/onboarding/TourManager'
 import {
   Home,
   Building2,
@@ -175,6 +176,9 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
+
+      {/* Onboarding tour — fires once per role, config in /public/tours.json */}
+      <TourManager role={role} />
 
       {/* Mobile Bottom Nav */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-50">
