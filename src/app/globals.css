@@ -5,36 +5,100 @@
 /* ── Intro.js onboarding tour ── */
 @import 'intro.js/introjs.css';
 
-/* Brand-themed overrides for the tour tooltips */
+/* ── Tooltip card ── */
 .afpa-tour-tooltip.introjs-tooltip {
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
-  max-width: 340px;
+  width: 300px;
+  min-width: 0;
+  max-width: 300px;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 0;
   font-family: inherit;
 }
 
+/* Header row: title + skip button side by side, fully inside the card */
 .introjs-tooltip-header {
-  padding-bottom: 4px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 16px 8px;
+  box-sizing: border-box;
 }
 
 .introjs-tooltip-title {
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 700;
-  color: #1e3a5f; /* brand-navy */
+  color: #1e3a5f;
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
 }
 
+/* Skip / close button — small ✕ icon in the top-right corner */
+.introjs-skipbutton {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border: none !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.introjs-skipbutton:hover,
+.introjs-skipbutton:focus {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Body text */
 .introjs-tooltiptext {
   font-size: 0.875rem;
   color: #4b5563;
   line-height: 1.6;
+  padding: 0 16px 12px;
+  box-sizing: border-box;
 }
 
-/* Progress bar */
+/* Progress bar track */
+.introjs-progress {
+  background: #e5e7eb;
+  height: 4px;
+  margin: 0 16px 12px;
+  border-radius: 9999px;
+}
+
 .introjs-progressbar {
-  background-color: #c9a84c; /* brand-gold */
+  background-color: #c9a84c;
+  border-radius: 9999px;
 }
 
-/* Buttons */
+/* Button row */
+.introjs-tooltipbuttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 16px 16px;
+  box-sizing: border-box;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+}
+
+/* All buttons base */
 .afpa-tour-btn.introjs-button {
   border-radius: 6px;
   font-size: 0.8125rem;
@@ -44,9 +108,17 @@
   background: #fff;
   color: #374151;
   text-shadow: none;
+  box-shadow: none;
+  cursor: pointer;
   transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 
+.afpa-tour-btn.introjs-button:hover {
+  background: #f9fafb;
+}
+
+/* Primary (Next / Done) */
 .afpa-tour-btn.introjs-nextbutton,
 .afpa-tour-btn.introjs-donebutton {
   background: #1e3a5f;
@@ -61,12 +133,7 @@
   color: #c9a84c;
 }
 
-.afpa-tour-btn.introjs-skipbutton {
-  color: #9ca3af;
-  font-weight: 400;
-}
-
-/* Highlight ring */
+/* Highlight ring on target element */
 .afpa-tour-highlight.introjs-helperLayer {
   box-shadow: 0 0 0 4px #c9a84c, 0 0 0 8px rgba(201, 168, 76, 0.2) !important;
   border-radius: 8px;
