@@ -23,6 +23,14 @@ type QuizAdminEmailArgs = {
   quizId: string
 }
 
+type FranchiseApplicationEmailArgs = {
+  to: string
+  franchiseName: string
+  applicantName: string
+  applicantEmail: string
+  applicationId: string
+}
+
 function getSiteUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL
   if (explicit) return explicit.replace(/\/+$/, '')
@@ -133,3 +141,34 @@ export async function sendQuizAdminNotificationEmail(args: QuizAdminEmailArgs): 
   })
 }
 
+export async function sendFranchiseApplicationNotificationEmail(
+  args: FranchiseApplicationEmailArgs
+): Promise<void> {
+  const siteUrl = getSiteUrl()
+  const subject = `New application for ${args.franchiseName}`
+  const reviewUrl = `${siteUrl}/dashboard/franchisor/applications`
+  const html = `
+    <p>A new franchise application was submitted.</p>
+    <p><strong>Franchise:</strong> ${args.franchiseName}<br/>
+    <strong>Applicant:</strong> ${args.applicantName}<br/>
+    <strong>Email:</strong> ${args.applicantEmail}<br/>
+    <strong>Application ID:</strong> ${args.applicationId}</p>
+    <p>Review applications: <a href="${reviewUrl}">${reviewUrl}</a></p>
+  `
+  const text = [
+    'A new franchise application was submitted.',
+    `Franchise: ${args.franchiseName}`,
+    `Applicant: ${args.applicantName}`,
+    `Email: ${args.applicantEmail}`,
+    `Application ID: ${args.applicationId}`,
+    `Review applications: ${reviewUrl}`,
+  ].join('\n')
+
+  await sendEmail({
+    to: args.to,
+    subject,
+    html,
+    text,
+    replyTo: args.applicantEmail,
+  })
+}

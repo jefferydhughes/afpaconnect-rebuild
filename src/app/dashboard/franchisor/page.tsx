@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { requireFranchisor } from '@/lib/require-role'
-import { Building2, Users, BarChart3, Settings, PlusCircle } from 'lucide-react'
+import { Building2, Users, BarChart3, Settings, PlusCircle, FileText } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -35,6 +35,7 @@ export default async function FranchisorDashboardPage() {
           <CardContent className="space-y-3">
             <Link href="/dashboard/franchisor/listings" className="block"><Button variant="outline" className="w-full justify-start"><Building2 className="mr-2 h-4 w-4" />Manage Listings</Button></Link>
             <Link href="/dashboard/franchisor/leads" className="block"><Button variant="outline" className="w-full justify-start"><Users className="mr-2 h-4 w-4" />View Leads</Button></Link>
+            <Link href="/dashboard/franchisor/applications" className="block"><Button variant="outline" className="w-full justify-start"><FileText className="mr-2 h-4 w-4" />View Applications</Button></Link>
             <Link href="/dashboard/franchisor/analytics" className="block"><Button variant="outline" className="w-full justify-start"><BarChart3 className="mr-2 h-4 w-4" />View Analytics</Button></Link>
             <Link href="/dashboard/franchisor/settings" className="block"><Button variant="outline" className="w-full justify-start"><Settings className="mr-2 h-4 w-4" />Settings</Button></Link>
           </CardContent>

@@ -57,6 +57,7 @@ const franchisorNavItems = [
   { href: '/dashboard/franchisor', label: 'Overview', icon: Home },
   { href: '/dashboard/franchisor/listings', label: 'My Listings', icon: Building2 },
   { href: '/dashboard/franchisor/leads', label: 'Leads', icon: Users },
+  { href: '/dashboard/franchisor/applications', label: 'Applications', icon: FileText },
   { href: '/dashboard/franchisor/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/franchisor/settings', label: 'Settings', icon: Settings },
 ]
