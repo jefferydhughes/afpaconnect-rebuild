@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Menu, X, ChevronDown, LayoutDashboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -58,12 +59,15 @@ export function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-navy">
-                <span className="text-lg font-bold text-brand-gold">A</span>
-              </div>
-              <span className="hidden text-xl font-bold text-brand-navy sm:block">
-                AFPA
-              </span>
+              <Image
+                src="https://res.cloudinary.com/dr76535kj/image/upload/v1771853591/AFPA-blue-logo1.5x_zvnsdp.webp"
+                alt="AFPA"
+                width={180}
+                height={48}
+                className="h-10 w-auto"
+                priority
+                unoptimized
+              />
             </Link>
           </div>
 
