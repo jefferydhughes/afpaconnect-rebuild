@@ -341,15 +341,6 @@ export default function FranchiseForm({ franchise }: { franchise?: FranchiseRow 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <Label>Liquid Capital Required ($)</Label>
-              <Input
-                type="number"
-                value={data.liquid_capital_required ?? ''}
-                onChange={e => set('liquid_capital_required', numOrNull(e.target.value))}
-                placeholder="e.g. 75000"
-              />
-            </div>
-            <div>
               <Label>Net Worth Required ($)</Label>
               <Input
                 type="number"
