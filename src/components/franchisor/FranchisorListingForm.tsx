@@ -125,7 +125,7 @@ export function FranchisorListingForm({ franchise }: { franchise: FranchiseInput
     setSaving(true)
     try {
       const { error } = await supabase
-        .from('franchises')
+        .from('franchise')
         .update(data)
         .eq('id', franchise.id)
       if (error) throw error
