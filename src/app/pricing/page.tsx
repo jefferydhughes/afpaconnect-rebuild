@@ -180,7 +180,7 @@ export default function PricingPage() {
                     variant={plan.buttonVariant}
                     asChild
                   >
-                    <Link href={plan.name === 'Basic Listing' ? '/franchisor/signup' : '#'}>
+                    <Link href={plan.name === 'Basic Listing' ? '/franchise-your-business' : '/contact'}>
                       {plan.buttonText}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Link>

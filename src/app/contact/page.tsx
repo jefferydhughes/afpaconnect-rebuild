@@ -26,12 +26,44 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    try {
+      const form = e.currentTarget
+      const formData = new FormData(form)
 
-    setIsSubmitting(false)
-    setIsSubmitted(true)
-    toast.success('Message sent! We\'ll get back to you soon.')
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      const payload = {
+        first_name: formData.get('firstName') as string,
+        last_name: formData.get('lastName') as string,
+        email: formData.get('email') as string,
+        phone: (formData.get('phone') as string) || null,
+        subject: formData.get('subject') as string,
+        message: formData.get('message') as string,
+        source: 'contact_form',
+      }
+
+      // Save as a lead so it appears in admin dashboard
+      const { error } = await supabase.from('leads').insert({
+        email: payload.email,
+        first_name: payload.first_name,
+        last_name: payload.last_name,
+        phone: payload.phone,
+        source: 'contact_form',
+        notes: `Subject: ${payload.subject}\n\n${payload.message}`,
+        status: 'new',
+      })
+
+      if (error) throw error
+
+      setIsSubmitted(true)
+      toast.success('Message sent! We\'ll get back to you soon.')
+    } catch (err) {
+      console.error('Contact form error:', err)
+      toast.error('Something went wrong. Please try again or email us directly.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -163,30 +195,32 @@ export default function ContactPage() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="firstName">First Name *</Label>
-                        <Input id="firstName" required placeholder="John" />
+                        <Input id="firstName" name="firstName" required placeholder="John" />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="lastName">Last Name *</Label>
-                        <Input id="lastName" required placeholder="Smith" />
+                        <Input id="lastName" name="lastName" required placeholder="Smith" />
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="email">Email *</Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        required 
-                        placeholder="john@example.com" 
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        placeholder="john@example.com"
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone (Optional)</Label>
-                      <Input 
-                        id="phone" 
-                        type="tel" 
-                        placeholder="(555) 123-4567" 
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="(555) 123-4567"
                       />
                     </div>
 
@@ -194,6 +228,7 @@ export default function ContactPage() {
                       <Label htmlFor="subject">Subject *</Label>
                       <select
                         id="subject"
+                        name="subject"
                         required
                         className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
                       >
@@ -211,6 +246,7 @@ export default function ContactPage() {
                       <Label htmlFor="message">Message *</Label>
                       <textarea
                         id="message"
+                        name="message"
                         required
                         rows={5}
                         placeholder="How can we help you?"

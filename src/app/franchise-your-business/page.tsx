@@ -74,9 +74,34 @@ export default function FranchiseYourBusinessPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+
+    try {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      const { error } = await supabase.from('leads').insert({
+        email: formData.email,
+        first_name: formData.name.split(' ')[0] || formData.name,
+        last_name: formData.name.split(' ').slice(1).join(' ') || null,
+        phone: formData.phone || null,
+        source: 'franchise_your_business',
+        notes: [
+          `Company: ${formData.company}`,
+          `Employees: ${formData.employees}`,
+          `Revenue: ${formData.revenue}`,
+          formData.message ? `Message: ${formData.message}` : null,
+        ].filter(Boolean).join('\n'),
+        status: 'new',
+      })
+
+      if (error) throw error
+      setIsSubmitted(true)
+    } catch (err) {
+      console.error('Franchise inquiry error:', err)
+      alert('Something went wrong. Please try again or contact us directly.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

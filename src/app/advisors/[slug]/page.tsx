@@ -266,7 +266,7 @@ export default async function AdvisorProfilePage({
             {firstName} is here to guide you through every step of finding the right franchise fit.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/quiz">
+            <Link href={advisor.created_by ? `/quiz?advisor=${advisor.created_by}` : '/quiz'}>
               <Button
                 size="lg"
                 className="bg-brand-gold text-brand-navy hover:bg-brand-gold-light font-semibold px-8"
