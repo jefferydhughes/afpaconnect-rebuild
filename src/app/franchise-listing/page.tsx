@@ -246,6 +246,10 @@ function FranchiseListingContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* DEBUG: remove after confirming premium works */}
+      <div className="bg-yellow-100 border-b border-yellow-300 px-4 py-2 text-xs text-yellow-900">
+        DEBUG: listing_plan=&quot;{brand.listing_plan ?? 'UNDEFINED'}&quot; | isPremium={isPremium ? 'YES' : 'NO'} | hero={brand.hero_image_url ? 'SET' : 'MISSING'} | video={brand.intro_video_url ? 'SET' : 'MISSING'}
+      </div>
       {/* Breadcrumbs */}
       <nav className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-3">
