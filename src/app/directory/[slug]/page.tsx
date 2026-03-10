@@ -30,6 +30,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import FddLeadCaptureModal from '@/components/directory/FddLeadCaptureModal'
 import { 
   formatCurrency, 
   formatInvestmentRange, 
@@ -582,12 +583,10 @@ export default async function FranchiseDetailPage({
                     </a>
                   )}
                   {franchise.fdd_url && (
-                    <a href={franchise.fdd_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" className="w-full">
-                        <FileText className="mr-2 h-4 w-4" />
-                        View FDD
-                      </Button>
-                    </a>
+                    <FddLeadCaptureModal
+                      franchiseName={franchise.name}
+                      fddUrl={franchise.fdd_url}
+                    />
                   )}
                   {isPremium && franchise.apply_now_url && (
                     <a href={franchise.apply_now_url} target="_blank" rel="noopener noreferrer">
