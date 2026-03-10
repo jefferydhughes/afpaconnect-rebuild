@@ -4,7 +4,7 @@ const footerLinks = {
   explore: [
     { name: 'Franchise Directory', href: '/directory' },
     { name: 'Take the Quiz', href: '/quiz' },
-    { name: 'Find an Advisor', href: '/advisors' },
+    { name: 'Find an Advisor', href: '/find-an-advisor' },
     { name: 'Investment Calculator', href: '/calculator' },
   ],
   resources: [
@@ -16,6 +16,7 @@ const footerLinks = {
   company: [
     { name: 'About Us', href: '/about' },
     { name: 'Our Team', href: '/our-team' },
+    { name: 'Our Advisors', href: '/advisors' },
     { name: 'Contact', href: '/contact' },
     { name: 'Submit Support Ticket', href: 'https://api.leadconnectorhq.com/widget/form/c2zHm8pcf4gDc12v8iQS' },
   ],

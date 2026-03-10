@@ -29,7 +29,7 @@ const navigation = [
       { name: 'FranchiseFit360™ Assessment', href: '/fit360' },
     ],
   },
-  { name: 'Find an Advisor', href: '/advisors' },
+  { name: 'Find an Advisor', href: '/find-an-advisor' },
 ]
 
 export function Header() {

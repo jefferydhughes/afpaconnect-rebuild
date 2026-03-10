@@ -39,6 +39,17 @@ const nextConfig = {
         destination: '/advisors',
         permanent: true,
       },
+      // Legacy franchise advisors page → new find-an-advisor
+      {
+        source: '/franchiseadvisors',
+        destination: '/find-an-advisor',
+        permanent: true,
+      },
+      {
+        source: '/FranchiseAdvisors',
+        destination: '/find-an-advisor',
+        permanent: true,
+      },
       // Old advisorpage with name param → new slug URL
       {
         source: '/advisorpage',
