@@ -45,6 +45,7 @@ type FranchiseRow = {
   is_featured: boolean
   is_active: boolean
   broker_email: string | null
+  listing_plan: string | null
 }
 
 const empty: FranchiseRow = {
@@ -56,6 +57,7 @@ const empty: FranchiseRow = {
   training_duration_weeks: null, support_level: null, total_locations: null,
   usa_locations: null, established_year: null, growth_potential: null,
   fdd_url: null, fdd_summary: null, is_featured: false, is_active: true, broker_email: null,
+  listing_plan: 'standard',
 }
 
 function slugify(name: string) {
@@ -457,6 +459,21 @@ export default function FranchiseForm({ franchise }: { franchise?: FranchiseRow 
       {/* ── LISTING PAGE ── */}
       {tab === 'Listing Page' && (
         <div className="space-y-5">
+          <div>
+            <Label>Listing Plan</Label>
+            <select
+              value={data.listing_plan ?? 'standard'}
+              onChange={e => set('listing_plan', e.target.value)}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy"
+            >
+              <option value="standard">Standard (directory card only)</option>
+              <option value="premium">Premium (full expanded page)</option>
+            </select>
+            <p className="text-xs text-gray-400 mt-1">
+              Premium unlocks the expanded listing page with hero image, video, gallery, social links, and reviews. The franchisor can fill these in from their dashboard.
+            </p>
+          </div>
+
           <div>
             <Label>Full Detailed Description</Label>
             <p className="text-xs text-gray-400 mb-1">Supports Markdown. This is shown on the franchise detail page.</p>

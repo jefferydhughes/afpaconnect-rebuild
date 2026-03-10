@@ -2,12 +2,12 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createAdminClient } from '@/lib/supabase/server'
-import { 
-  Building2, 
-  MapPin, 
-  DollarSign, 
-  Clock, 
-  Users, 
+import {
+  Building2,
+  MapPin,
+  DollarSign,
+  Clock,
+  Users,
   TrendingUp,
   CheckCircle,
   Globe,
@@ -18,7 +18,11 @@ import {
   FileText,
   ArrowLeft,
   Share2,
-  Heart
+  Heart,
+  Play,
+  Download,
+  ExternalLink,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -156,6 +160,7 @@ export default async function FranchiseDetailPage({
   }
 
   const { franchise, relatedFranchises } = data
+  const isPremium = franchise.listing_plan === 'premium'
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -172,6 +177,19 @@ export default async function FranchiseDetailPage({
           </div>
         </div>
       </div>
+
+      {/* Premium Hero Image */}
+      {isPremium && franchise.hero_image_url && (
+        <div className="relative h-64 md:h-80 w-full overflow-hidden">
+          <Image
+            src={franchise.hero_image_url}
+            alt={`${franchise.name} hero`}
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        </div>
+      )}
 
       {/* Hero Section */}
       <div className="bg-white border-b">
@@ -274,6 +292,52 @@ export default async function FranchiseDetailPage({
                 <CardContent>
                   <div className="prose prose-gray max-w-none">
                     {franchise.full_description}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Premium: Intro Video */}
+            {isPremium && franchise.intro_video_url && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Play className="h-5 w-5 text-brand-gold" />
+                    Watch Our Story
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="aspect-video rounded-lg overflow-hidden">
+                    <iframe
+                      src={franchise.intro_video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                      title={`${franchise.name} intro video`}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Premium: Gallery */}
+            {isPremium && (franchise.gallery_image_1 || franchise.gallery_image_2 || franchise.gallery_image_3) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ImageIcon className="h-5 w-5 text-brand-gold" />
+                    Gallery
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {[franchise.gallery_image_1, franchise.gallery_image_2, franchise.gallery_image_3]
+                      .filter(Boolean)
+                      .map((url: string, i: number) => (
+                        <div key={i} className="relative aspect-[4/3] rounded-lg overflow-hidden">
+                          <Image src={url} alt={`${franchise.name} gallery ${i + 1}`} fill className="object-cover" />
+                        </div>
+                      ))}
                   </div>
                 </CardContent>
               </Card>
@@ -433,6 +497,64 @@ export default async function FranchiseDetailPage({
                 </CardContent>
               </Card>
             )}
+            {/* Premium: Social Links */}
+            {isPremium && (franchise.facebook_url || franchise.instagram_url || franchise.linkedin_url || franchise.youtube_url || franchise.twitter_url || franchise.tiktok_url) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-brand-gold" />
+                    Connect With Us
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-3">
+                    {[
+                      { url: franchise.facebook_url, label: 'Facebook' },
+                      { url: franchise.instagram_url, label: 'Instagram' },
+                      { url: franchise.twitter_url, label: 'Twitter / X' },
+                      { url: franchise.linkedin_url, label: 'LinkedIn' },
+                      { url: franchise.youtube_url, label: 'YouTube' },
+                      { url: franchise.tiktok_url, label: 'TikTok' },
+                    ]
+                      .filter(s => s.url)
+                      .map(s => (
+                        <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer">
+                          <Badge variant="outline" className="px-3 py-1.5 hover:bg-brand-cream cursor-pointer">
+                            {s.label}
+                          </Badge>
+                        </a>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Premium: Google Reviews */}
+            {isPremium && franchise.show_google_reviews && franchise.google_reviews_embed && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Customer Reviews</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div dangerouslySetInnerHTML={{ __html: franchise.google_reviews_embed }} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Premium: Calendar Embed */}
+            {isPremium && franchise.calendar_embed && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-brand-gold" />
+                    Schedule a Call
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div dangerouslySetInnerHTML={{ __html: franchise.calendar_embed }} />
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -461,6 +583,22 @@ export default async function FranchiseDetailPage({
                       <Button variant="outline" className="w-full">
                         <FileText className="mr-2 h-4 w-4" />
                         View FDD
+                      </Button>
+                    </a>
+                  )}
+                  {isPremium && franchise.apply_now_url && (
+                    <a href={franchise.apply_now_url} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full bg-green-600 text-white hover:bg-green-700">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Apply Now
+                      </Button>
+                    </a>
+                  )}
+                  {isPremium && franchise.info_pack_url && (
+                    <a href={franchise.info_pack_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" className="w-full">
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Info Pack
                       </Button>
                     </a>
                   )}
