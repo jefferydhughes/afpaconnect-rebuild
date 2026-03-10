@@ -99,8 +99,8 @@ export default function FddLeadCaptureModal({ franchiseName, fddUrl }: FddLeadCa
         })
 
       if (error) {
-        console.error('Error creating lead:', error)
-        toast.error('Failed to submit request. Please try again.')
+        console.error('Error creating lead:', error.message, error.details, error.hint, error.code)
+        toast.error(`Failed to submit: ${error.message || 'Unknown error'}`)
       } else {
         setIsSubmitted(true)
         toast.success('Request submitted successfully!')
