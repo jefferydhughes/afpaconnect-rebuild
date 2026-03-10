@@ -5,12 +5,12 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { 
-  Building2, 
-  MapPin, 
-  DollarSign, 
-  Clock, 
-  Users, 
+import {
+  Building2,
+  MapPin,
+  DollarSign,
+  Clock,
+  Users,
   TrendingUp,
   Globe,
   Mail,
@@ -22,7 +22,11 @@ import {
   Heart,
   Star,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Play,
+  Download,
+  ExternalLink,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -230,6 +234,8 @@ function FranchiseListingContent() {
     experience_required
   } = brand
 
+  const isPremium = brand.listing_plan === 'premium'
+
   const totalLocations = total_locations ? parseInt(String(total_locations), 10) : null
 
   const formatMoney = (v: number | null | undefined) => typeof v === 'number' ? `$${v.toLocaleString()}` : '-'
@@ -265,6 +271,19 @@ function FranchiseListingContent() {
           </ol>
         </div>
       </nav>
+
+      {/* Premium Hero Image */}
+      {isPremium && brand.hero_image_url && (
+        <div className="relative h-64 md:h-80 w-full overflow-hidden">
+          <Image
+            src={brand.hero_image_url}
+            alt={`${name} hero`}
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+        </div>
+      )}
 
       {/* Hero */}
       <section className="relative mb-6 border-b border-gray-200" style={{ background: 'linear-gradient(135deg, #0A3540 0%, #2E6A7C 50%, #3D5A9F 100%)' }}>
@@ -422,7 +441,7 @@ function FranchiseListingContent() {
           <section id="details">
             <div className="rounded-2xl bg-white p-8 shadow-sm">
               <h2 className="text-base font-semibold text-gray-900 mb-2">Business Details</h2>
-              
+
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 {business_model && (
                   <div className="rounded-xl bg-gray-50 p-4">
@@ -464,6 +483,101 @@ function FranchiseListingContent() {
               </div>
             </div>
           </section>
+
+          {/* Premium: Intro Video */}
+          {isPremium && brand.intro_video_url && (
+            <section>
+              <div className="rounded-2xl bg-white p-8 shadow-sm">
+                <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Play className="h-5 w-5 text-brand-gold" />
+                  Watch Our Story
+                </h2>
+                <div className="aspect-video rounded-lg overflow-hidden">
+                  <iframe
+                    src={brand.intro_video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                    title={`${name} intro video`}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Premium: Gallery */}
+          {isPremium && (brand.gallery_image_1 || brand.gallery_image_2 || brand.gallery_image_3) && (
+            <section>
+              <div className="rounded-2xl bg-white p-8 shadow-sm">
+                <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5 text-brand-gold" />
+                  Gallery
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {[brand.gallery_image_1, brand.gallery_image_2, brand.gallery_image_3]
+                    .filter(Boolean)
+                    .map((url: string, i: number) => (
+                      <div key={i} className="relative aspect-[4/3] rounded-lg overflow-hidden">
+                        <Image src={url} alt={`${name} gallery ${i + 1}`} fill className="object-cover" />
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Premium: Social Links */}
+          {isPremium && (brand.facebook_url || brand.instagram_url || brand.linkedin_url || brand.youtube_url || brand.twitter_url || brand.tiktok_url) && (
+            <section>
+              <div className="rounded-2xl bg-white p-8 shadow-sm">
+                <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-brand-gold" />
+                  Connect With Us
+                </h2>
+                <div className="flex flex-wrap gap-3">
+                  {[
+                    { url: brand.facebook_url, label: 'Facebook' },
+                    { url: brand.instagram_url, label: 'Instagram' },
+                    { url: brand.twitter_url, label: 'Twitter / X' },
+                    { url: brand.linkedin_url, label: 'LinkedIn' },
+                    { url: brand.youtube_url, label: 'YouTube' },
+                    { url: brand.tiktok_url, label: 'TikTok' },
+                  ]
+                    .filter(s => s.url)
+                    .map(s => (
+                      <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer">
+                        <span className="inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-brand-cream hover:border-brand-gold cursor-pointer transition-colors">
+                          {s.label}
+                        </span>
+                      </a>
+                    ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Premium: Google Reviews */}
+          {isPremium && brand.show_google_reviews && brand.google_reviews_embed && (
+            <section>
+              <div className="rounded-2xl bg-white p-8 shadow-sm">
+                <h2 className="text-base font-semibold text-gray-900 mb-4">Customer Reviews</h2>
+                <div dangerouslySetInnerHTML={{ __html: brand.google_reviews_embed }} />
+              </div>
+            </section>
+          )}
+
+          {/* Premium: Calendar Embed */}
+          {isPremium && brand.calendar_embed && (
+            <section>
+              <div className="rounded-2xl bg-white p-8 shadow-sm">
+                <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-brand-gold" />
+                  Schedule a Call
+                </h2>
+                <div dangerouslySetInnerHTML={{ __html: brand.calendar_embed }} />
+              </div>
+            </section>
+          )}
         </main>
 
         {/* Sticky Sidebar */}
@@ -490,6 +604,22 @@ function FranchiseListingContent() {
                     <Button variant="outline" className="w-full border-white/30 text-white hover:bg-white/10">
                       <FileText className="mr-2 h-4 w-4" />
                       View FDD
+                    </Button>
+                  </a>
+                )}
+                {isPremium && brand.apply_now_url && (
+                  <a href={brand.apply_now_url} target="_blank" rel="noopener noreferrer">
+                    <Button className="w-full bg-green-600 text-white hover:bg-green-700">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Apply Now
+                    </Button>
+                  </a>
+                )}
+                {isPremium && brand.info_pack_url && (
+                  <a href={brand.info_pack_url} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="w-full border-white/30 text-white hover:bg-white/10">
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Info Pack
                     </Button>
                   </a>
                 )}
