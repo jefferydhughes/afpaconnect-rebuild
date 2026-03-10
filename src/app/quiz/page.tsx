@@ -236,14 +236,25 @@ export default function QuizPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [quizResultId, setQuizResultId] = useState<string | null>(null)
   const [territorySearch, setTerritorySearch] = useState('')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+  const quizCardRef = useRef<HTMLDivElement>(null)
 
   const currentQuestion = QUIZ_QUESTIONS[currentQuestionIndex]
   const progress = ((currentQuestionIndex) / QUIZ_QUESTIONS.length) * 100
 
+  // Scroll the chat container to the bottom (without moving the page)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, showOptions, isTyping])
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }, [messages, isTyping])
+
+  // Scroll the page so the quiz card is at the top when the question changes
+  useEffect(() => {
+    if (hasStarted && quizCardRef.current) {
+      quizCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [currentQuestionIndex, hasStarted])
 
   const addBotMessage = (text: string, delay = 800) => {
     setIsTyping(true)
@@ -381,14 +392,19 @@ export default function QuizPage() {
       const urlParams = new URLSearchParams(window.location.search)
       const advisorId = urlParams.get('advisor') || urlParams.get('ref')
       
+      const payload: Record<string, any> = {
+        ...finalAnswers,
+        source: 'website',
+      }
+      // Only include advisor ID if present (avoid sending null which fails zod validation)
+      if (advisorId) {
+        payload.attributed_advisor_id = advisorId
+      }
+
       const response = await fetch('/api/quiz/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...finalAnswers,
-          attributed_advisor_id: advisorId,
-          source: 'website',
-        }),
+        body: JSON.stringify(payload),
       })
 
       let responseData: any = null
@@ -400,10 +416,8 @@ export default function QuizPage() {
       }
 
       if (!response.ok) {
-        const apiError =
-          typeof responseData === 'string'
-            ? responseData
-            : responseData?.details || responseData?.error || `HTTP ${response.status}`
+        const rawError = responseData?.details || responseData?.error || `HTTP ${response.status}`
+        const apiError = typeof rawError === 'string' ? rawError : JSON.stringify(rawError)
         throw new Error(apiError)
       }
       
@@ -446,7 +460,7 @@ export default function QuizPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 py-8 px-4">
       <div className="max-w-2xl mx-auto">
-        <Card className="shadow-2xl overflow-hidden">
+        <Card ref={quizCardRef} className="shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-brand-navy to-brand-navy-light text-white p-6">
             <div className="flex items-center justify-between">
@@ -502,7 +516,7 @@ export default function QuizPage() {
               // Chat Interface
               <div className="space-y-4">
                 {/* Messages */}
-                <div className="h-[400px] overflow-y-auto space-y-4 pr-2">
+                <div ref={chatContainerRef} className="h-[400px] overflow-y-auto space-y-4 pr-2">
                   <AnimatePresence>
                     {messages.map((message, index) => (
                       <motion.div
@@ -543,7 +557,6 @@ export default function QuizPage() {
                     </motion.div>
                   )}
 
-                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* Options */}

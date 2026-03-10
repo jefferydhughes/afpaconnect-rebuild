@@ -46,8 +46,8 @@ const quizPayloadSchema = z.object({
     email: z.string().trim().email(),
     phone: z.string().trim().max(40).optional(),
   }),
-  attributed_advisor_id: z.string().trim().optional(),
-  source: z.string().trim().max(80).optional(),
+  attributed_advisor_id: z.string().trim().optional().nullable(),
+  source: z.string().trim().max(80).optional().nullable(),
 }).strict()
 
 function getOpenAIClient() {
@@ -59,8 +59,14 @@ export async function POST(request: NextRequest) {
   try {
     const parsedBody = quizPayloadSchema.safeParse(await request.json())
     if (!parsedBody.success) {
+      const flat = parsedBody.error.flatten()
+      const fieldErrors = flat.fieldErrors
+      // Build a human-readable summary of validation issues
+      const errorSummary = Object.entries(fieldErrors)
+        .map(([field, msgs]) => `${field}: ${(msgs as string[]).join(', ')}`)
+        .join('; ')
       return NextResponse.json(
-        { error: 'Invalid quiz payload', details: parsedBody.error.flatten() },
+        { error: 'Invalid quiz payload', details: errorSummary || 'Validation failed' },
         { status: 400 }
       )
     }
