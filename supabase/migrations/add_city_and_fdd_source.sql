@@ -1,6 +1,9 @@
 -- Migration: Add city column to leads and fdd_request source
 -- Purpose: Support FDD lead capture gating workflow
 
+-- Ensure id column has a default UUID generator (dashboard-created table was missing this)
+ALTER TABLE public.leads ALTER COLUMN id SET DEFAULT gen_random_uuid();
+
 -- Add city column to leads table
 ALTER TABLE public.leads ADD COLUMN IF NOT EXISTS city TEXT;
 
