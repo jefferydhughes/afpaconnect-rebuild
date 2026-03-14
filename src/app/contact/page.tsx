@@ -30,31 +30,25 @@ export default function ContactPage() {
       const form = e.currentTarget
       const formData = new FormData(form)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-
       const payload = {
-        first_name: formData.get('firstName') as string,
-        last_name: formData.get('lastName') as string,
+        firstName: formData.get('firstName') as string,
+        lastName: formData.get('lastName') as string,
         email: formData.get('email') as string,
         phone: (formData.get('phone') as string) || null,
         subject: formData.get('subject') as string,
         message: formData.get('message') as string,
-        source: 'contact_form',
       }
 
-      // Save as a lead so it appears in admin dashboard
-      const { error } = await supabase.from('leads').insert({
-        email: payload.email,
-        first_name: payload.first_name,
-        last_name: payload.last_name,
-        phone: payload.phone,
-        source: 'contact_form',
-        notes: `Subject: ${payload.subject}\n\n${payload.message}`,
-        status: 'new',
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       })
 
-      if (error) throw error
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to send message')
+      }
 
       setIsSubmitted(true)
       toast.success('Message sent! We\'ll get back to you soon.')
