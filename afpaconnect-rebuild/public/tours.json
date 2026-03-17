@@ -1,0 +1,202 @@
+{
+  "admin": {
+    "steps": [
+      {
+        "title": "Welcome, Admin! 👋",
+        "intro": "This is your AFPAConnect admin dashboard. Let's take a quick tour so you know where everything lives.",
+        "element": null
+      },
+      {
+        "title": "Navigation Sidebar",
+        "intro": "Everything you need is here in the sidebar. Manage franchises, users, leads, analytics, and more — all from one place.",
+        "element": "aside .flex-col.flex-1",
+        "position": "right"
+      },
+      {
+        "title": "Franchise Listings",
+        "intro": "Add, edit, and manage all franchise brands on the platform. Control which listings are active and featured in the directory.",
+        "element": "aside nav a[href='/dashboard/admin/franchises']",
+        "position": "right"
+      },
+      {
+        "title": "User Management",
+        "intro": "View all registered users, change their roles, and associate franchisors with their brand listing.",
+        "element": "aside nav a[href='/dashboard/admin/users']",
+        "position": "right"
+      },
+      {
+        "title": "Leads & Advisors",
+        "intro": "Track incoming leads and manage your advisor network from here.",
+        "element": "aside nav a[href='/dashboard/admin/leads']",
+        "position": "right"
+      },
+      {
+        "title": "Analytics",
+        "intro": "Monitor platform-wide performance — quiz completions, lead volume, and franchise engagement.",
+        "element": "aside nav a[href='/dashboard/admin/analytics']",
+        "position": "right"
+      },
+      {
+        "title": "Platform Guide",
+        "intro": "New to something? The Platform Guide has step-by-step instructions for every admin task.",
+        "element": "aside nav a[href='/dashboard/admin/docs']",
+        "position": "right"
+      },
+      {
+        "title": "You're all set! 🚀",
+        "intro": "You have full control of the platform. If you ever need a refresher, click <strong>Reset Tour</strong> in Settings.",
+        "element": null
+      }
+    ]
+  },
+
+  "franchisor": {
+    "steps": [
+      {
+        "title": "Welcome to your Franchisor Dashboard! 🏢",
+        "intro": "This is your home base for managing your franchise presence on AFPAConnect. Let's show you around.",
+        "element": null
+      },
+      {
+        "title": "Your Dashboard",
+        "intro": "The sidebar gives you quick access to every section of your franchisor portal.",
+        "element": "aside .flex-col.flex-1",
+        "position": "right"
+      },
+      {
+        "title": "My Listings",
+        "intro": "View and edit your franchise listing — update your description, gallery images, investment details, and more.",
+        "element": "aside nav a[href='/dashboard/franchisor/listings']",
+        "position": "right"
+      },
+      {
+        "title": "Leads",
+        "intro": "See every prospect who has expressed interest in your franchise. Follow up and track their status here.",
+        "element": "aside nav a[href='/dashboard/franchisor/leads']",
+        "position": "right"
+      },
+      {
+        "title": "Analytics",
+        "intro": "Connect your marketing platforms — Google My Business, Meta Ads, Google Analytics — and track all performance in one place.",
+        "element": "aside nav a[href='/dashboard/franchisor/analytics']",
+        "position": "right"
+      },
+      {
+        "title": "Settings",
+        "intro": "Update your account details and notification preferences here.",
+        "element": "aside nav a[href='/dashboard/franchisor/settings']",
+        "position": "right"
+      },
+      {
+        "title": "Ready to grow! 🎉",
+        "intro": "Your dashboard is set up. Start by reviewing your listing to make sure it's looking its best for prospective franchisees.",
+        "element": null
+      }
+    ]
+  },
+
+  "advisor": {
+    "steps": [
+      {
+        "title": "Welcome, Advisor! 🤝",
+        "intro": "Your AFPAConnect advisor portal helps you manage leads, match candidates to franchises, and grow your pipeline.",
+        "element": null
+      },
+      {
+        "title": "Advisor Navigation",
+        "intro": "Everything you need is right here in the sidebar.",
+        "element": "aside .flex-col.flex-1",
+        "position": "right"
+      },
+      {
+        "title": "My Leads",
+        "intro": "Track all your candidates here — see their quiz results, budget range, and where they are in the process.",
+        "element": "aside nav a[href='/dashboard/advisor/leads']",
+        "position": "right"
+      },
+      {
+        "title": "AI Tools",
+        "intro": "Use AI-powered matching to find the right franchises for each candidate based on their profile and quiz results.",
+        "element": "aside nav a[href='/dashboard/advisor/ai-tools']",
+        "position": "right"
+      },
+      {
+        "title": "Settings",
+        "intro": "Keep your advisor profile up to date — candidates see your bio, photo, and calendar booking link.",
+        "element": "aside nav a[href='/dashboard/advisor/settings']",
+        "position": "right"
+      },
+      {
+        "title": "Let's get to work! 💼",
+        "intro": "You're all set. Head to My Leads to see your current pipeline, or use AI Tools to start matching a new candidate.",
+        "element": null
+      }
+    ]
+  },
+
+  "franchise_rep": {
+    "steps": [
+      {
+        "title": "Welcome, Franchise Rep! 👋",
+        "intro": "Your portal helps you manage leads and applications for your franchise brand.",
+        "element": null
+      },
+      {
+        "title": "Navigation",
+        "intro": "Use the sidebar to move between your leads, applications, and settings.",
+        "element": "aside .flex-col.flex-1",
+        "position": "right"
+      },
+      {
+        "title": "My Leads",
+        "intro": "View all prospects who have shown interest in your brand. Reach out and move them through your pipeline here.",
+        "element": "aside nav a[href='/dashboard/franchise-rep/leads']",
+        "position": "right"
+      },
+      {
+        "title": "Applications",
+        "intro": "Review formal franchise applications and update their status as candidates progress.",
+        "element": "aside nav a[href='/dashboard/franchise-rep/applications']",
+        "position": "right"
+      },
+      {
+        "title": "You're ready! 🎉",
+        "intro": "Start by checking your leads to see who's interested in your brand right now.",
+        "element": null
+      }
+    ]
+  },
+
+  "user": {
+    "steps": [
+      {
+        "title": "Welcome to AFPAConnect! 🌟",
+        "intro": "We help you find the perfect franchise opportunity. Let's show you how to get started.",
+        "element": null
+      },
+      {
+        "title": "Your Dashboard",
+        "intro": "This is your personal hub. Track your franchise research and manage your profile from here.",
+        "element": "main",
+        "position": "right"
+      },
+      {
+        "title": "Take the Franchise Quiz",
+        "intro": "Not sure where to start? Our quiz matches you to franchises based on your budget, lifestyle, and goals — it only takes 5 minutes.",
+        "element": "aside nav a[href='/quiz']",
+        "position": "right"
+      },
+      {
+        "title": "Browse the Directory",
+        "intro": "Explore hundreds of franchise opportunities. Filter by category, investment range, and business model.",
+        "element": "aside nav a[href='/directory']",
+        "position": "right"
+      },
+      {
+        "title": "You're all set! ✨",
+        "intro": "Ready to find your franchise? We recommend starting with the quiz — it'll show you your best matches instantly.",
+        "element": null
+      }
+    ]
+  }
+}

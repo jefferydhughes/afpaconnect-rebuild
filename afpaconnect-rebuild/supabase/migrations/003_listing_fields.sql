@@ -1,0 +1,22 @@
+-- Add paid listing / custom listing page fields to franchises table
+ALTER TABLE public.franchises
+  ADD COLUMN IF NOT EXISTS listing_plan TEXT DEFAULT 'standard',
+  ADD COLUMN IF NOT EXISTS hero_image_url TEXT,
+  ADD COLUMN IF NOT EXISTS intro_video_url TEXT,
+  ADD COLUMN IF NOT EXISTS info_pack_url TEXT,
+  ADD COLUMN IF NOT EXISTS apply_now_url TEXT,
+  ADD COLUMN IF NOT EXISTS request_info_embed TEXT,
+  ADD COLUMN IF NOT EXISTS gallery_image_1 TEXT,
+  ADD COLUMN IF NOT EXISTS gallery_image_2 TEXT,
+  ADD COLUMN IF NOT EXISTS gallery_image_3 TEXT,
+  ADD COLUMN IF NOT EXISTS calendar_embed TEXT,
+  ADD COLUMN IF NOT EXISTS facebook_url TEXT,
+  ADD COLUMN IF NOT EXISTS instagram_url TEXT,
+  ADD COLUMN IF NOT EXISTS twitter_url TEXT,
+  ADD COLUMN IF NOT EXISTS linkedin_url TEXT,
+  ADD COLUMN IF NOT EXISTS youtube_url TEXT,
+  ADD COLUMN IF NOT EXISTS tiktok_url TEXT,
+  ADD COLUMN IF NOT EXISTS google_reviews_embed TEXT,
+  ADD COLUMN IF NOT EXISTS show_google_reviews BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS seo_title TEXT,
+  ADD COLUMN IF NOT EXISTS seo_meta_description TEXT;

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(node -e:*)",
+      "Bash(npm install:*)",
+      "Bash(grep -v \":0$\")",
+      "Bash(echo \"EXIT_CODE: $?\")",
+      "Bash(grep -l \"export default async function\" /c/Users/jeff/Downloads/afpaconnect-rebuild/afpaconnect-rebuild/src/app/dashboard/franchisor/*/page.tsx)",
+      "Bash(find c:/Users/jeff/Downloads/afpaconnect-rebuild/afpaconnect-rebuild -name *.sql)",
+      "Bash(find \"c:/Users/jeff/Downloads/afpaconnect-rebuild/afpaconnect-rebuild\" -type f -name \"*.ts\" -o -name \"*.tsx\" | xargs grep -l \"quiz\" 2>/dev/null | grep -v \".next\" | head -50)",
+      "Bash(find \"c:/Users/jeff/Downloads/afpaconnect-rebuild/afpaconnect-rebuild/src/components\" -type f -name \"*.tsx\" -o -name \"*.ts\" | xargs grep -l \"quiz\" 2>/dev/null)",
+      "Bash(find \"c:/Users/jeff/Downloads/afpaconnect-rebuild/afpaconnect-rebuild/src/lib\" -type f -name \"*.tsx\" -o -name \"*.ts\" | xargs grep -l \"quiz\" 2>/dev/null)"
+    ]
+  }
+}

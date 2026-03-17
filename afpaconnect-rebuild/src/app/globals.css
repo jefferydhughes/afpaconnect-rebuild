@@ -1,0 +1,364 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Intro.js onboarding tour ── */
+@import 'intro.js/introjs.css';
+
+/* ── Tooltip card ── */
+.afpa-tour-tooltip.introjs-tooltip {
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+  width: 300px;
+  min-width: 0;
+  max-width: 300px;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 0;
+  font-family: inherit;
+}
+
+/* Header row: title + skip button side by side, fully inside the card */
+.introjs-tooltip-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 16px 8px;
+  box-sizing: border-box;
+}
+
+.introjs-tooltip-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Skip / close button — small ✕ icon in the top-right corner */
+.introjs-skipbutton {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border: none !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.introjs-skipbutton:hover,
+.introjs-skipbutton:focus {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Body text */
+.introjs-tooltiptext {
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.6;
+  padding: 0 16px 12px;
+  box-sizing: border-box;
+}
+
+/* Progress bar track */
+.introjs-progress {
+  background: #e5e7eb;
+  height: 4px;
+  margin: 0 16px 12px;
+  border-radius: 9999px;
+}
+
+.introjs-progressbar {
+  background-color: #c9a84c;
+  border-radius: 9999px;
+}
+
+/* Button row */
+.introjs-tooltipbuttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 16px 16px;
+  box-sizing: border-box;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+}
+
+/* All buttons base */
+.afpa-tour-btn.introjs-button {
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  text-shadow: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.afpa-tour-btn.introjs-button:hover {
+  background: #f9fafb;
+}
+
+/* Primary (Next / Done) */
+.afpa-tour-btn.introjs-nextbutton,
+.afpa-tour-btn.introjs-donebutton {
+  background: #1e3a5f;
+  border-color: #1e3a5f;
+  color: #c9a84c;
+}
+
+.afpa-tour-btn.introjs-nextbutton:hover,
+.afpa-tour-btn.introjs-donebutton:hover {
+  background: #2a4f7f;
+  border-color: #2a4f7f;
+  color: #c9a84c;
+}
+
+/* Highlight ring on target element */
+.afpa-tour-highlight.introjs-helperLayer {
+  box-shadow: 0 0 0 4px #c9a84c, 0 0 0 8px rgba(201, 168, 76, 0.2) !important;
+  border-radius: 8px;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 210 40% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 40% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 40% 14%;
+
+    --primary: 210 60% 15%;
+    --primary-foreground: 43 55% 50%;
+
+    --secondary: 43 55% 50%;
+    --secondary-foreground: 210 60% 15%;
+
+    --muted: 40 30% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 43 55% 50%;
+    --accent-foreground: 210 60% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 210 60% 15%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 210 40% 10%;
+    --foreground: 0 0% 98%;
+
+    --card: 210 40% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 210 40% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 43 55% 50%;
+    --primary-foreground: 210 60% 15%;
+
+    --secondary: 210 40% 20%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 210 40% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 43 55% 50%;
+    --accent-foreground: 210 60% 15%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 40% 20%;
+    --input: 210 40% 20%;
+    --ring: 43 55% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Button variants */
+  .btn-primary {
+    @apply bg-brand-navy text-brand-gold font-semibold px-6 py-3 rounded-full 
+           hover:bg-brand-navy-light transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-brand-gold focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply bg-brand-gold text-brand-navy font-semibold px-6 py-3 rounded-full 
+           hover:bg-brand-gold-light transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-brand-navy focus:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply border-2 border-brand-navy text-brand-navy font-semibold px-6 py-3 rounded-full 
+           hover:bg-brand-navy hover:text-white transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-brand-navy focus:ring-offset-2;
+  }
+
+  /* Card styles */
+  .card-elevated {
+    @apply bg-white rounded-2xl shadow-lg border border-gray-100 
+           hover:shadow-xl transition-shadow duration-300;
+  }
+
+  .card-featured {
+    @apply bg-white rounded-2xl shadow-lg border-t-4 border-brand-gold 
+           hover:shadow-xl transition-shadow duration-300;
+  }
+
+  /* Quiz specific styles */
+  .quiz-option {
+    @apply flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 
+           cursor-pointer transition-all duration-200 
+           hover:border-brand-gold hover:bg-brand-cream;
+  }
+
+  .quiz-option.selected {
+    @apply border-brand-gold bg-brand-cream;
+  }
+
+  /* Typography */
+  .heading-hero {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold text-brand-navy leading-tight;
+  }
+
+  .heading-section {
+    @apply text-2xl md:text-3xl font-bold text-brand-navy;
+  }
+
+  .text-body {
+    @apply text-gray-600 leading-relaxed;
+  }
+
+  /* Gradient backgrounds */
+  .gradient-hero {
+    @apply bg-gradient-to-br from-brand-cream via-white to-brand-cream;
+  }
+
+  .gradient-navy {
+    @apply bg-gradient-to-r from-brand-navy to-brand-navy-light;
+  }
+
+  /* Match score badges */
+  .match-badge-excellent {
+    @apply bg-brand-navy text-brand-gold px-4 py-1 rounded-full font-semibold text-sm;
+  }
+
+  .match-badge-good {
+    @apply bg-brand-navy-light text-white px-4 py-1 rounded-full font-semibold text-sm;
+  }
+
+  .match-badge-consider {
+    @apply bg-gray-500 text-white px-4 py-1 rounded-full font-semibold text-sm;
+  }
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out;
+}
+
+/* Chat bubble animations */
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+.typing-dot {
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full hover:bg-gray-400;
+}
+
+/* Focus visible styling */
+:focus-visible {
+  @apply outline-none ring-2 ring-brand-gold ring-offset-2;
+}
