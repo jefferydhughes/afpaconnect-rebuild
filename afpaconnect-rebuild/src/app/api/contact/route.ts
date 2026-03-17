@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient } from '@/lib/supabase/server'
 
 const NOTIFICATION_EMAIL = 'notifications@afpaconnect.com'
 
