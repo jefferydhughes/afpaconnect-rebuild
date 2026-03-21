@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -13,59 +13,41 @@ import { toast } from 'sonner'
 
 function ResetPasswordForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClient()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [isSessionReady, setIsSessionReady] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
-    // Handle error params from Supabase (e.g. expired token)
-    const error = searchParams.get('error_description') || searchParams.get('error')
-    if (error) {
-      toast.error(decodeURIComponent(error.replace(/\+/g, ' ')))
-      router.push('/login')
-      return
-    }
+    // Supabase JS client auto-detects the hash fragment from the recovery
+    // email link and sets up the session. We just listen for it.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        setIsReady(true)
+      }
+    })
 
-    const code = searchParams.get('code')
+    // Also check if there's already an active session (e.g. page refresh)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setIsReady(true)
+      }
+    })
 
-    if (code) {
-      // PKCE flow: exchange the code for a session first
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
-          toast.error('Invalid or expired reset link. Please request a new one.')
-          router.push('/login')
-        } else {
-          setIsSessionReady(true)
-          // Clean the code from the URL
-          window.history.replaceState({}, '', '/reset-password')
-        }
-      })
-    } else {
-      // No code — check if there's already an active session (e.g. hash fragment flow)
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (!session) {
-          toast.error('Invalid or expired reset link. Please request a new one.')
-          router.push('/login')
-        } else {
-          setIsSessionReady(true)
-        }
-      })
-    }
-  }, [supabase, router, searchParams])
+    return () => subscription.unsubscribe()
+  }, [supabase])
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match')
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters')
       return
     }
 
-    if (password.length < 8) {
-      toast.error('Password must be at least 8 characters')
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match')
       return
     }
 
@@ -85,7 +67,7 @@ function ResetPasswordForm() {
     }
   }
 
-  if (!isSessionReady) {
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-cream via-white to-brand-cream">
         <Loader2 className="h-8 w-8 animate-spin text-brand-navy" />
@@ -125,6 +107,7 @@ function ResetPasswordForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10"
+                    autoComplete="new-password"
                     minLength={8}
                     required
                   />
@@ -141,6 +124,7 @@ function ResetPasswordForm() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="pl-10"
+                    autoComplete="new-password"
                     minLength={8}
                     required
                   />
