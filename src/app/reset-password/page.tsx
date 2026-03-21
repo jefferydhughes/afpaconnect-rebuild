@@ -21,6 +21,14 @@ function ResetPasswordForm() {
   const [isSessionReady, setIsSessionReady] = useState(false)
 
   useEffect(() => {
+    // Handle error params from Supabase (e.g. expired token)
+    const error = searchParams.get('error_description') || searchParams.get('error')
+    if (error) {
+      toast.error(decodeURIComponent(error.replace(/\+/g, ' ')))
+      router.push('/login')
+      return
+    }
+
     const code = searchParams.get('code')
 
     if (code) {
