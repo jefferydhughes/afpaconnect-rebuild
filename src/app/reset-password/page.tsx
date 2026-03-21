@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -11,8 +11,9 @@ import { Label } from '@/components/ui/label'
 import { Loader2, Lock } from 'lucide-react'
 import { toast } from 'sonner'
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -20,16 +21,32 @@ export default function ResetPasswordPage() {
   const [isSessionReady, setIsSessionReady] = useState(false)
 
   useEffect(() => {
-    // Verify we have an active session (set by the auth callback code exchange)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        toast.error('Invalid or expired reset link. Please request a new one.')
-        router.push('/login')
-      } else {
-        setIsSessionReady(true)
-      }
-    })
-  }, [supabase, router])
+    const code = searchParams.get('code')
+
+    if (code) {
+      // PKCE flow: exchange the code for a session first
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          toast.error('Invalid or expired reset link. Please request a new one.')
+          router.push('/login')
+        } else {
+          setIsSessionReady(true)
+          // Clean the code from the URL
+          window.history.replaceState({}, '', '/reset-password')
+        }
+      })
+    } else {
+      // No code — check if there's already an active session (e.g. hash fragment flow)
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+          toast.error('Invalid or expired reset link. Please request a new one.')
+          router.push('/login')
+        } else {
+          setIsSessionReady(true)
+        }
+      })
+    }
+  }, [supabase, router, searchParams])
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -141,5 +158,17 @@ export default function ResetPasswordPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-cream via-white to-brand-cream">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-navy" />
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   )
 }
