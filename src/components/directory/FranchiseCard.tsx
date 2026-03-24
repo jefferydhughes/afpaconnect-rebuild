@@ -74,7 +74,7 @@ export default function FranchiseCard({
                           (!description && full_description && full_description.length > 160)
 
   return (
-    <Card className={`h-full flex flex-col hover:shadow-lg transition-all ${isPremiumListing ? 'border-brand-gold featured' : ''}`}>
+    <Card className={`flex flex-col hover:shadow-lg transition-all ${isPremiumListing ? 'border-brand-gold featured' : ''}`}>
       <CardHeader className="p-4">
         <div className="flex justify-between items-start gap-3">
           <div className="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg p-2 flex items-center justify-center border border-gray-200">
@@ -162,7 +162,7 @@ export default function FranchiseCard({
           </div>
         )}
         
-        <div className="text-sm mt-auto">
+        <div className="text-sm">
           <p className="font-semibold text-gray-500">Investment Range</p>
           <p className="text-lg font-bold text-brand-navy">
             {formatInvestmentRange(initial_investment_min, initial_investment_max)}

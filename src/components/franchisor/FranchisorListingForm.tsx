@@ -287,7 +287,6 @@ export function FranchisorListingForm({ franchise }: { franchise: FranchiseInput
           />
         </Field>
       </SectionCard>
-
       {/* 4. Social & Reviews */}
       <SectionCard title="Social & Reviews">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

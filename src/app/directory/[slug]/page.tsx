@@ -41,7 +41,6 @@ import {
 
 type FranchisePayload = {
   franchise: any
-  relatedFranchises: any[]
   canonicalSlug: string
 }
 
@@ -121,18 +120,7 @@ async function getFranchise(slug: string): Promise<FranchisePayload | null> {
   if (!franchise) return null
 
   const canonicalSlug = franchise.slug || slugify(franchise.name || franchise.id)
-  let relatedFranchises: any[] = []
-  if (franchise.category) {
-    const related = await supabase
-      .from(franchiseTable)
-      .select('id, name, slug, logo_url, category, initial_investment_min, initial_investment_max')
-      .eq('category', franchise.category)
-      .neq('id', franchise.id)
-      .limit(3)
-    relatedFranchises = related.data || []
-  }
-
-  return { franchise, relatedFranchises, canonicalSlug }
+  return { franchise, canonicalSlug }
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
@@ -163,7 +151,7 @@ export default async function FranchiseDetailPage({
     redirect(`/directory/${data.canonicalSlug}`)
   }
 
-  const { franchise, relatedFranchises } = data
+  const { franchise } = data
   const isPremium = franchise.listing_plan === 'premium'
 
   return (
@@ -628,45 +616,6 @@ export default async function FranchiseDetailPage({
               </CardContent>
             </Card>
 
-            {/* Related Franchises */}
-            {relatedFranchises.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Similar Franchises</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {relatedFranchises.map((related) => (
-                    <Link
-                      key={related.id}
-                      href={`/directory/${related.slug || related.id}`}
-                      className="flex items-center gap-3 p-3 rounded-lg border hover:border-brand-gold transition-colors"
-                    >
-                      <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {related.logo_url ? (
-                          <Image
-                            src={related.logo_url}
-                            alt={related.name}
-                            width={40}
-                            height={40}
-                            className="object-contain"
-                          />
-                        ) : (
-                          <Building2 className="h-5 w-5 text-gray-400" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm text-gray-900 truncate">
-                          {related.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {formatInvestmentRange(related.initial_investment_min, related.initial_investment_max)}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </div>
