@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Loader2, CheckCircle, FileText } from 'lucide-react'
 import { toast } from 'sonner'
+import { getAdvisorFromCookie } from '@/lib/utils'
 
 interface RequestInfoModalProps {
   isOpen: boolean
@@ -16,6 +17,7 @@ interface RequestInfoModalProps {
   franchise: {
     id: string
     name: string
+    broker_email?: string | null
   } | null
 }
 
@@ -64,6 +66,56 @@ export default function RequestInfoModal({ isOpen, onOpenChange, franchise }: Re
     setIsSubmitting(true)
     
     try {
+      // Determine recipient email
+      let recipientEmail = 'notifications@afpaconnect.com' // fallback
+      
+      // Priority 1: Franchisor email if available
+      if (franchise?.broker_email) {
+        recipientEmail = franchise.broker_email
+      } else {
+        // Priority 2: Advisor email if available
+        const advisorId = getAdvisorFromCookie()
+        if (advisorId) {
+          try {
+            const { data: advisor } = await supabase
+              .from('profiles')
+              .select('email')
+              .eq('id', advisorId)
+              .eq('role', 'advisor')
+              .eq('advisor_is_active', true)
+              .single()
+            
+            if (advisor?.email) {
+              recipientEmail = advisor.email
+            }
+          } catch (error) {
+            console.warn('Could not fetch advisor email:', error)
+            // Fall back to default notification email
+          }
+        }
+      }
+      
+      // Send email notification
+      const emailResponse = await fetch('/api/franchise-inquiry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: `${firstName} ${lastName}`,
+          email: email,
+          phone: phone,
+          message: `Franchise Information Request\n\nFranchise: ${franchise?.name}\n\n${message}`,
+          subject: `Franchise Information Request: ${franchise?.name}`,
+          recipient: recipientEmail,
+        }),
+      })
+
+      if (!emailResponse.ok) {
+        throw new Error('Failed to send email')
+      }
+
+      // Also store in database for tracking
       const { error } = await supabase
         .from('leads')
         .insert({
@@ -72,17 +124,17 @@ export default function RequestInfoModal({ isOpen, onOpenChange, franchise }: Re
           last_name: lastName,
           phone: phone || null,
           source: 'listing_request_info',
-          message: `Request Info from Listing Page - ${franchise.name}\nMessage: ${message || 'No message provided.'}`,
-          franchise_ids: [franchise.id],
+          message: `Request Info from Listing Page - ${franchise?.name}\nMessage: ${message || 'No message provided.'}`,
+          franchise_ids: [franchise?.id],
         })
 
       if (error) {
         console.error('Error creating lead:', error)
-        toast.error('Failed to submit request. Please try again.')
-      } else {
-        setIsSubmitted(true)
-        toast.success('Request sent successfully!')
+        // Don't fail the whole request if database insert fails
       }
+
+      setIsSubmitted(true)
+      toast.success('Request sent successfully!')
     } catch (error) {
       console.error("Error submitting request:", error)
       toast.error('Failed to submit request. Please try again.')

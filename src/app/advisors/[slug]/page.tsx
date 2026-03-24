@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import CalendarEmbed from '@/app/advisorpage/CalendarEmbed'
+import AdvisorCookieSetter from '@/components/advisor/AdvisorCookieSetter'
 
 function toSlug(name: string | null): string {
   return (name ?? '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
@@ -76,6 +77,7 @@ export default async function AdvisorProfilePage({
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <AdvisorCookieSetter advisorId={advisor.id} />
 
       {/* ── Hero ── */}
       <div className="bg-brand-navy text-white py-16">

@@ -11,6 +11,7 @@ import {
   Smartphone,
 } from 'lucide-react'
 import CalendarEmbed from './CalendarEmbed'
+import AdvisorCookieSetter from '@/components/advisor/AdvisorCookieSetter'
 
 export const dynamic = 'force-dynamic'
 
@@ -109,6 +110,7 @@ export default async function AdvisorPage({
 
   return (
     <div className="font-sans text-gray-800 bg-white">
+      <AdvisorCookieSetter advisorId={advisor.id} />
       <style>{`
         .calendar-embed-container iframe {
           width: 100%;
