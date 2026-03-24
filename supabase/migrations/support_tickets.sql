@@ -55,6 +55,15 @@ CREATE POLICY "Admins can manage support tickets" ON public.support_tickets
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'home_office'))
     );
 
+-- Ensure the updated_at helper function exists
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Updated_at trigger
 CREATE TRIGGER update_support_tickets_updated_at
     BEFORE UPDATE ON public.support_tickets

@@ -97,11 +97,11 @@ export default function FranchiseForm({ franchise }: { franchise?: FranchiseRow 
         if (!res.ok) throw new Error(result.error || 'Failed to create franchise')
         toast.success('Franchise created! Redirecting to edit page…')
         // Redirect to the new franchise's edit page — use id if available, fall back to slug
-        const editKey = result.id || `slug:${result.slug || data.slug}`
+        const editKey = result.id || result.slug || data.slug
         router.push(`/dashboard/admin/franchises/${editKey}?created=1`)
         router.refresh()
       } else {
-        const editId = franchise!.id || `slug:${franchise!.slug}`
+        const editId = franchise!.id || franchise!.slug
         const res = await fetch(`/api/admin/franchises?id=${editId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },

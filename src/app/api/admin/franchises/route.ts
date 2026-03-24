@@ -40,7 +40,9 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(franchise)
 }
 
-// Update an existing franchise — supports UUID id or "slug:the-slug" format
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+// Update an existing franchise — auto-detects UUID id vs slug
 export async function PATCH(request: NextRequest) {
   const auth = await requireAdminUser()
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -50,16 +52,15 @@ export async function PATCH(request: NextRequest) {
 
   const body = await request.json()
 
-  // Determine whether to look up by UUID or slug
-  let query = auth.admin.from('franchise').update(body)
+  // Detect UUID vs slug by format
+  const column = UUID_RE.test(identifier) ? 'id' : 'slug'
 
-  if (identifier.startsWith('slug:')) {
-    query = query.eq('slug', identifier.slice(5))
-  } else {
-    query = query.eq('id', identifier)
-  }
-
-  const { data: franchise, error } = await query.select('*').single()
+  const { data: franchise, error } = await auth.admin
+    .from('franchise')
+    .update(body)
+    .eq(column, identifier)
+    .select('*')
+    .single()
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

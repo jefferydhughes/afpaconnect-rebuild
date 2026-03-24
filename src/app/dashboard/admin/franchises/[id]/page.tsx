@@ -6,31 +6,24 @@ import { ArrowLeft, ExternalLink, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import FranchiseForm from '@/components/admin/FranchiseForm'
 
-// Resolves a franchise by UUID id or by slug (prefixed with "slug:")
+// UUID v4 pattern
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+// Resolves a franchise by UUID id or by slug
 async function resolveFranchise(identifier: string) {
   const adminSupabase = createAdminClient()
+  const isUuid = UUID_RE.test(identifier)
 
-  // If the identifier starts with "slug:", look up by slug
-  if (identifier.startsWith('slug:')) {
-    const slug = identifier.slice(5)
+  if (isUuid) {
     const { data } = await adminSupabase
       .from('franchise')
       .select('*')
-      .eq('slug', slug)
-      .single()
-    return data
+      .eq('id', identifier)
+      .maybeSingle()
+    if (data) return data
   }
 
-  // Try by UUID first
-  const { data: byId } = await adminSupabase
-    .from('franchise')
-    .select('*')
-    .eq('id', identifier)
-    .maybeSingle()
-
-  if (byId) return byId
-
-  // Fallback: try as slug directly (handles bookmarks, manual URLs)
+  // Look up by slug (either because it's not a UUID, or UUID lookup failed)
   const { data: bySlug } = await adminSupabase
     .from('franchise')
     .select('*')
