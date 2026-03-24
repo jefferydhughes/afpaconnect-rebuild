@@ -6,6 +6,40 @@ import { ArrowLeft, ExternalLink, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import FranchiseForm from '@/components/admin/FranchiseForm'
 
+// Resolves a franchise by UUID id or by slug (prefixed with "slug:")
+async function resolveFranchise(identifier: string) {
+  const adminSupabase = createAdminClient()
+
+  // If the identifier starts with "slug:", look up by slug
+  if (identifier.startsWith('slug:')) {
+    const slug = identifier.slice(5)
+    const { data } = await adminSupabase
+      .from('franchise')
+      .select('*')
+      .eq('slug', slug)
+      .single()
+    return data
+  }
+
+  // Try by UUID first
+  const { data: byId } = await adminSupabase
+    .from('franchise')
+    .select('*')
+    .eq('id', identifier)
+    .maybeSingle()
+
+  if (byId) return byId
+
+  // Fallback: try as slug directly (handles bookmarks, manual URLs)
+  const { data: bySlug } = await adminSupabase
+    .from('franchise')
+    .select('*')
+    .eq('slug', identifier)
+    .maybeSingle()
+
+  return bySlug
+}
+
 export default async function EditFranchisePage({
   params,
   searchParams,
@@ -15,12 +49,7 @@ export default async function EditFranchisePage({
 }) {
   await requireAdmin('/dashboard/admin/franchises')
 
-  const adminSupabase = createAdminClient()
-  const { data: franchise } = await adminSupabase
-    .from('franchise')
-    .select('*')
-    .eq('id', params.id)
-    .single()
+  const franchise = await resolveFranchise(params.id)
 
   if (!franchise) notFound()
 
@@ -74,13 +103,6 @@ export default async function EditFranchisePage({
                   >
                     <ExternalLink className="h-4 w-4" />
                     Full Directory
-                  </Link>
-                  <Link
-                    href={`/dashboard/admin/franchises/${franchise.id}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-green-200 px-3 py-2 text-sm font-medium text-green-800 hover:bg-green-100 transition-colors"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Edit Page (this page)
                   </Link>
                 </div>
                 <p className="text-green-600 text-xs mt-3">

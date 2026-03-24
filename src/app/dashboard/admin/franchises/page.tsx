@@ -140,7 +140,7 @@ export default async function AdminFranchisesPage({
                             <Eye className="h-4 w-4" />
                           </Button>
                         </Link>
-                        <Link href={`/dashboard/admin/franchises/${franchise.id}`}>
+                        <Link href={`/dashboard/admin/franchises/${franchise.id || `slug:${franchise.slug}`}`}>
                           <Button variant="ghost" size="sm" className="text-brand-navy h-8 px-2">
                             <Edit className="h-4 w-4 mr-1" />
                             Edit
