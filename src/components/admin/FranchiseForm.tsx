@@ -64,7 +64,7 @@ function slugify(name: string) {
 
 export default function FranchiseForm({ franchise }: { franchise?: FranchiseRow }) {
   const router = useRouter()
-  const isNew = !franchise?.id
+  const isNew = !franchise
   const [tab, setTab] = useState<Tab>('Basic Info')
   const [saving, setSaving] = useState(false)
   const [data, setData] = useState<FranchiseRow>(franchise ?? empty)
