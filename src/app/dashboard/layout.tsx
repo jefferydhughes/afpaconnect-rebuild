@@ -15,6 +15,7 @@ import {
   Briefcase,
   MapPin,
   BookOpen,
+  LifeBuoy,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -40,6 +41,7 @@ const adminNavItems = [
   { href: '/dashboard/admin/leads', label: 'Leads', icon: Mail },
   { href: '/dashboard/admin/quizzes', label: 'Quiz Results', icon: FileText },
   { href: '/dashboard/admin/location-pages', label: 'Location Pages', icon: MapPin },
+  { href: '/dashboard/admin/support-tickets', label: 'Support Tickets', icon: LifeBuoy },
   { href: '/dashboard/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/admin/settings', label: 'Settings', icon: Settings },
   { href: '/dashboard/admin/docs', label: 'Platform Guide', icon: BookOpen },
