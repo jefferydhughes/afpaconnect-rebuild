@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Search, Filter, Building2 } from 'lucide-react'
@@ -94,18 +94,28 @@ function DirectoryContent({
     page: searchParams.page ? parseInt(searchParams.page) : 1,
   })
 
-  const fetchFranchises = async () => {
+  // Sync filters with searchParams changes
+  useEffect(() => {
+    setFilters({
+      category: searchParams.category || 'all',
+      investment: searchParams.investment || 'all',
+      search: searchParams.search || '',
+      page: searchParams.page ? parseInt(searchParams.page) : 1,
+    })
+  }, [searchParams])
+
+  const fetchFranchises = useCallback(async () => {
     setIsLoading(true)
     const result = await getFranchises(filters)
     setFranchises(result.franchises)
     setTotal(result.total)
     setTotalPages(result.totalPages)
     setIsLoading(false)
-  }
+  }, [filters])
 
-  useState(() => {
+  useEffect(() => {
     fetchFranchises()
-  })
+  }, [fetchFranchises])
 
   const handleAddToCompare = (franchise: any) => {
     setCompareList(prev => {
