@@ -2,14 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
-import { Loader2, Save, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Loader2, Save, ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { FRANCHISE_CATEGORIES, toCategorySlug } from '@/lib/franchise-categories'
 
@@ -66,7 +64,6 @@ function slugify(name: string) {
 
 export default function FranchiseForm({ franchise }: { franchise?: FranchiseRow }) {
   const router = useRouter()
-  const supabase = createClient()
   const isNew = !franchise?.id
   const [tab, setTab] = useState<Tab>('Basic Info')
   const [saving, setSaving] = useState(false)
@@ -91,19 +88,28 @@ export default function FranchiseForm({ franchise }: { franchise?: FranchiseRow 
     setSaving(true)
     try {
       if (isNew) {
-        const { error } = await supabase.from('franchise').insert(data)
-        if (error) throw error
-        toast.success('Franchise created!')
+        const res = await fetch('/api/admin/franchises', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        const result = await res.json()
+        if (!res.ok) throw new Error(result.error || 'Failed to create franchise')
+        toast.success('Franchise created! Redirecting to edit page…')
+        // Redirect to the new franchise's edit page so it's immediately accessible
+        router.push(`/dashboard/admin/franchises/${result.id}?created=1`)
+        router.refresh()
       } else {
-        const { error } = await supabase
-          .from('franchise')
-          .update(data)
-          .eq('id', franchise!.id!)
-        if (error) throw error
+        const res = await fetch(`/api/admin/franchises?id=${franchise!.id!}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        const result = await res.json()
+        if (!res.ok) throw new Error(result.error || 'Failed to save')
         toast.success('Franchise saved!')
+        router.refresh()
       }
-      router.push('/dashboard/admin/franchises')
-      router.refresh()
     } catch (err: any) {
       toast.error(err.message || 'Failed to save')
     } finally {
