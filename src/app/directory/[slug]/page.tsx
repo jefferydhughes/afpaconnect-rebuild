@@ -31,12 +31,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import FddLeadCaptureModal from '@/components/directory/FddLeadCaptureModal'
-import { 
-  formatCurrency, 
-  formatInvestmentRange, 
+import RequestInfoButton from '@/components/directory/RequestInfoButton'
+import {
+  formatCurrency,
+  formatInvestmentRange,
   getCategoryLabel,
   getBusinessModelLabel,
-  getTimeCommitmentLabel 
+  getTimeCommitmentLabel
 } from '@/lib/utils'
 
 type FranchisePayload = {
@@ -558,10 +559,10 @@ export default async function FranchiseDetailPage({
                   Interested in {franchise.name}?
                 </h3>
                 <div className="space-y-3">
-                  <Button className="w-full bg-brand-navy text-brand-gold hover:bg-brand-navy-light">
-                    <Mail className="mr-2 h-4 w-4" />
-                    Request Information
-                  </Button>
+                  <RequestInfoButton
+                    franchise={{ id: franchise.id, name: franchise.name, broker_email: franchise.broker_email }}
+                    className="w-full bg-brand-navy text-brand-gold hover:bg-brand-navy-light"
+                  />
                   {franchise.website_url && (
                     <a href={franchise.website_url} target="_blank" rel="noopener noreferrer">
                       <Button variant="outline" className="w-full">
