@@ -86,10 +86,7 @@ export async function POST(request: Request) {
 
     if (dbError) {
       console.error('Lead insert error:', dbError)
-      return NextResponse.json(
-        { error: 'Failed to save inquiry' },
-        { status: 500 }
-      )
+      // Log but don't block — still attempt to send email
     }
 
     const siteUrl = getSiteUrl()
@@ -126,10 +123,8 @@ export async function POST(request: Request) {
     })
 
     if (inquiryResult.error) {
-      return NextResponse.json(
-        { error: 'Failed to send email' },
-        { status: 500 }
-      )
+      console.error('Failed to send inquiry email:', inquiryResult.error)
+      // Don't fail the request — lead is already saved
     }
 
     // 3. Send thank-you email to the person who submitted

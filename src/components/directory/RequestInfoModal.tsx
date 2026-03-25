@@ -112,25 +112,9 @@ export default function RequestInfoModal({ isOpen, onOpenChange, franchise }: Re
       })
 
       if (!emailResponse.ok) {
-        throw new Error('Failed to send email')
-      }
-
-      // Also store in database for tracking
-      const { error } = await supabase
-        .from('leads')
-        .insert({
-          email,
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone || null,
-          source: 'listing_request_info',
-          message: `Request Info from Listing Page - ${franchise?.name}\nMessage: ${message || 'No message provided.'}`,
-          franchise_ids: [franchise?.id],
-        })
-
-      if (error) {
-        console.error('Error creating lead:', error)
-        // Don't fail the whole request if database insert fails
+        const errBody = await emailResponse.text()
+        console.error('Inquiry API error:', errBody)
+        throw new Error('Failed to submit request')
       }
 
       setIsSubmitted(true)
