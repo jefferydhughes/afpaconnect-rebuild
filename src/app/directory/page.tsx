@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import FranchiseCard from '@/components/directory/FranchiseCard'
 import RequestInfoModal from '@/components/directory/RequestInfoModal'
 import FloatingCompareButton from '@/components/directory/FloatingCompareButton'
-import { FRANCHISE_CATEGORIES } from '@/lib/franchise-categories'
+import { FRANCHISE_CATEGORIES, getCategoryMatchValues } from '@/lib/franchise-categories'
 
 const CATEGORIES = [
   { value: 'all', label: 'All Categories' },
@@ -46,7 +46,8 @@ async function getFranchises(params: {
     .range(offset, offset + pageSize - 1)
 
   if (params.category && params.category !== 'all') {
-    query = query.eq('category', params.category)
+    const matchValues = getCategoryMatchValues(params.category)
+    query = query.in('category', matchValues)
   }
 
   if (params.investment && params.investment !== 'all') {
