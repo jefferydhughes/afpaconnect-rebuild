@@ -9,7 +9,10 @@
     "lint": "next lint",
     "db:generate": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/database.ts",
     "db:push": "supabase db push",
-    "db:reset": "supabase db reset"
+    "db:reset": "supabase db reset",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
