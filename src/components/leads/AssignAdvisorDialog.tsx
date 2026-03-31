@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Loader2, UserPlus, Search } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -40,7 +39,6 @@ export default function AssignAdvisorDialog({
   currentAdvisorId,
   onAdvisorAssigned,
 }: Props) {
-  const supabase = createClient()
   const [advisors, setAdvisors] = useState<Advisor[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -50,16 +48,16 @@ export default function AssignAdvisorDialog({
   useEffect(() => {
     if (!open) return
     setLoading(true)
-    supabase
-      .from('profiles')
-      .select('id, full_name, email, advisor_specialties, advisor_image_url')
-      .eq('role', 'advisor')
-      .eq('advisor_is_active', true)
-      .order('full_name')
-      .then(({ data }) => {
-        setAdvisors(data || [])
-        setLoading(false)
+    fetch('/api/advisors/active')
+      .then((res) => res.json())
+      .then((data) => {
+        setAdvisors(data.advisors || [])
       })
+      .catch((err) => {
+        console.error('Failed to load advisors:', err)
+        toast.error('Failed to load advisors')
+      })
+      .finally(() => setLoading(false))
   }, [open])
 
   const filtered = advisors.filter((a) => {
