@@ -71,7 +71,10 @@ export default function EmailComposerDialog({
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || 'Failed to send email')
+        const detail = err.detail?.message || err.detail?.statusCode
+          ? ` (${err.detail.message || err.detail.statusCode})`
+          : ''
+        throw new Error((err.error || 'Failed to send email') + detail)
       }
 
       toast.success(`Email sent to ${recipientName || recipientEmail}`)

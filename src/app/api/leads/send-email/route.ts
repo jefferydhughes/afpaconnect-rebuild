@@ -3,14 +3,6 @@ import { createAdminClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createAdminClient()
-
-    // Verify caller is authenticated admin or advisor
-    const authHeader = req.headers.get('authorization')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader?.replace('Bearer ', '') || ''
-    )
-
     const body = await req.json()
     const { to, subject, body: emailBody, leadId, senderName, replyTo } = body
 
@@ -21,15 +13,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Send via Resend
+    // Send via Resend — mirrors the proven test-email route pattern
     const apiKey = process.env.RESEND_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
+      return NextResponse.json({ error: 'RESEND_API_KEY is not set' }, { status: 500 })
     }
 
-    const fromAddress =
+    const from =
       process.env.AFPA_EMAIL_FROM ||
-      'AFPAConnect <notifications@afpaconnect.com>'
+      process.env.EMAIL_FROM ||
+      'AFPAConnect Notifications <notifications@afpaconnect.com>'
 
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -38,8 +31,8 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: fromAddress,
-        to: Array.isArray(to) ? to : [to],
+        from,
+        to,
         subject,
         html: emailBody,
         text: emailBody.replace(/<[^>]*>/g, ''),
@@ -47,27 +40,32 @@ export async function POST(req: NextRequest) {
       }),
     })
 
+    const result = await response.json()
+
     if (!response.ok) {
-      const errBody = await response.text()
-      console.error('Resend error:', errBody)
+      console.error('Resend error:', JSON.stringify(result))
       return NextResponse.json(
-        { error: 'Failed to send email' },
+        { error: 'Failed to send email', detail: result },
         { status: 500 }
       )
     }
 
-    const result = await response.json()
-
     // Update lead last_contacted_at if leadId provided
     if (leadId) {
-      await supabase
-        .from('leads')
-        .update({
-          last_contacted_at: new Date().toISOString(),
-          status: 'contacted',
-        })
-        .eq('id', leadId)
-        .eq('status', 'new') // only auto-advance from 'new'
+      try {
+        const supabase = createAdminClient()
+        await supabase
+          .from('leads')
+          .update({
+            last_contacted_at: new Date().toISOString(),
+            status: 'contacted',
+          })
+          .eq('id', leadId)
+          .eq('status', 'new') // only auto-advance from 'new'
+      } catch (dbErr) {
+        // Non-critical — email was already sent
+        console.error('Failed to update lead after email:', dbErr)
+      }
     }
 
     return NextResponse.json({ success: true, id: result.id })

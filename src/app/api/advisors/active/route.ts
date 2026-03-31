@@ -1,20 +1,21 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 
-// GET /api/advisors/active — list all active advisors (uses admin client to bypass RLS)
+// GET /api/advisors/active — list all advisors (uses admin client to bypass RLS)
 export async function GET() {
   try {
     const supabase = createAdminClient()
 
+    // Query advisors by role. Don't filter on advisor_is_active since
+    // it defaults to false and most advisors haven't had it explicitly set.
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name, email, advisor_specialties, advisor_image_url')
+      .select('id, full_name, email, advisor_specialties, advisor_image_url, advisor_is_active')
       .eq('role', 'advisor')
-      .eq('advisor_is_active', true)
       .order('full_name')
 
     if (error) {
-      console.error('Error fetching advisors:', error)
+      console.error('Error fetching advisors:', JSON.stringify(error))
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
