@@ -125,7 +125,7 @@ export default async function AdminLeadsPage({
           <Link
             href={`/dashboard/admin/leads?view=${isPipeline ? 'table' : 'pipeline'}${searchParams.status ? '&status=' + searchParams.status : ''}`}
           >
-            <Button size="sm" style={{ background: '#fff', color: '#374151', border: '1px solid #d1d5db' }}>
+            <Button size="sm" variant="ghost" className="!bg-gray-500 !text-white !border-0 hover:!bg-gray-500 hover:!text-white">
               {isPipeline ? (
                 <><LayoutList className="mr-2 h-4 w-4" />Table View</>
               ) : (
@@ -133,7 +133,7 @@ export default async function AdminLeadsPage({
               )}
             </Button>
           </Link>
-          <Button size="sm" style={{ background: '#fff', color: '#374151', border: '1px solid #d1d5db' }}>
+          <Button size="sm" variant="ghost" className="!bg-gray-500 !text-white !border-0 hover:!bg-gray-500 hover:!text-white">
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </Button>
@@ -185,7 +185,7 @@ export default async function AdminLeadsPage({
               <option value="converted">Converted</option>
               <option value="unqualified">Unqualified</option>
             </select>
-            <Button type="submit">
+            <Button type="submit" variant="ghost" className="!bg-gray-500 !text-white !border-0 hover:!bg-gray-500 hover:!text-white">
               <Filter className="mr-2 h-4 w-4" />
               Apply
             </Button>
