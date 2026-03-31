@@ -171,7 +171,7 @@ export default function LeadDetailPanel({
       })
       .catch(() => setInsightsError(true))
       .finally(() => setInsightsLoading(false))
-  }, [quizResult])
+  }, [quizResult, lead.first_name])
 
   async function handleSaveNotes() {
     setSavingNotes(true)

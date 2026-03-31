@@ -84,13 +84,13 @@ export default async function AdminLeadsPage({
   const leads = await getLeads(searchParams.status, searchParams.search)
 
   // Resolve advisor names
-  const advisorIds = [
-    ...new Set(
+  const advisorIds = Array.from(
+    new Set(
       leads
         .map((l) => l.attributed_advisor_id)
         .filter(Boolean) as string[]
-    ),
-  ]
+    )
+  )
   const advisorNames = await getAdvisorNames(advisorIds)
 
   const enrichedLeads = leads.map((l) => ({
