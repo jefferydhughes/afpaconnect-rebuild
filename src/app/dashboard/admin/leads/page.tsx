@@ -116,27 +116,26 @@ export default async function AdminLeadsPage({
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Lead Pipeline</h1>
-          <p className="text-gray-600">{stats.total} total leads across all stages</p>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Lead Pipeline</h1>
+        <div className="flex items-center gap-4 mt-1">
+          <span className="text-gray-600">{stats.total} total leads across all stages</span>
+          <span className="text-gray-300">|</span>
           <Link
             href={`/dashboard/admin/leads?view=${isPipeline ? 'table' : 'pipeline'}${searchParams.status ? '&status=' + searchParams.status : ''}`}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center"
           >
-            <Button size="sm" variant="ghost" className="!bg-gray-500 !text-white !border">
-              {isPipeline ? (
-                <><LayoutList className="mr-2 h-4 w-4" />Table View</>
-              ) : (
-                <><LayoutGrid className="mr-2 h-4 w-4" />Pipeline View</>
-              )}
-            </Button>
+            {isPipeline ? (
+              <><LayoutList className="mr-1 h-3.5 w-3.5" />Table View</>
+            ) : (
+              <><LayoutGrid className="mr-1 h-3.5 w-3.5" />Pipeline View</>
+            )}
           </Link>
-          <Button size="sm" variant="ghost" className="!bg-gray-500 !text-white !border-0 hover:!bg-gray-500 hover:!text-white">
-            <Download className="mr-2 h-4 w-4" />
+          <span className="text-gray-300">|</span>
+          <span className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center cursor-pointer">
+            <Download className="mr-1 h-3.5 w-3.5" />
             Export CSV
-          </Button>
+          </span>
         </div>
       </div>
 
@@ -185,10 +184,10 @@ export default async function AdminLeadsPage({
               <option value="converted">Converted</option>
               <option value="unqualified">Unqualified</option>
             </select>
-            <Button type="submit" variant="ghost" className="!bg-gray-500 !text-white !border-0 hover:!bg-gray-500 hover:!text-white">
-              <Filter className="mr-2 h-4 w-4" />
+            <button type="submit" className="h-10 px-4 text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
+              <Filter className="mr-1.5 h-3.5 w-3.5" />
               Apply
-            </Button>
+            </button>
           </form>
         </CardContent>
       </Card>
