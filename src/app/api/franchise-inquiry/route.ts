@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       first_name: name.split(' ')[0] || name,
       last_name: name.split(' ').slice(1).join(' ') || '',
       phone: phone || null,
-      source: 'franchise_inquiry',
+      source: 'directory_inquiry',
       message: message,
       status: 'new',
     })

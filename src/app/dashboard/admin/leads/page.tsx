@@ -30,17 +30,19 @@ async function getLeads(status?: string) {
 
   let query = supabase
     .from('leads')
-    .select(`
-      *,
-      profiles:attributed_advisor_id (full_name)
-    `)
+    .select('*')
     .order('created_at', { ascending: false })
 
   if (status && status !== 'all') {
     query = query.eq('status', status)
   }
 
-  const { data } = await query.limit(100)
+  const { data, error } = await query.limit(100)
+
+  if (error) {
+    console.error('Error fetching leads:', error)
+    return []
+  }
 
   return (data || []) as LeadWithProfile[]
 }
@@ -204,7 +206,9 @@ export default async function AdminLeadsPage({
                       )}
                     </td>
                     <td className="py-3 px-4 text-sm">
-                      {lead.profiles?.full_name || (
+                      {lead.attributed_advisor_id ? (
+                        <span>{lead.attributed_advisor_id.slice(0, 8)}...</span>
+                      ) : (
                         <span className="text-gray-400">Unassigned</span>
                       )}
                     </td>
