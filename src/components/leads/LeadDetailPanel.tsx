@@ -251,44 +251,34 @@ export default function LeadDetailPanel({
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-white border-white/30 hover:bg-white/10"
+              <button
+                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white border border-white/30 rounded-md hover:bg-white/10"
                 onClick={() => setEmailOpen(true)}
               >
                 <Mail className="mr-2 h-4 w-4" />
                 Email
-              </Button>
+              </button>
               {lead.phone && (
-                <a href={`tel:${lead.phone}`}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-white border-white/30 hover:bg-white/10"
-                  >
-                    <Phone className="mr-2 h-4 w-4" />
-                    Call
-                  </Button>
+                <a href={`tel:${lead.phone}`}
+                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white border border-white/30 rounded-md hover:bg-white/10"
+                >
+                  <Phone className="mr-2 h-4 w-4" />
+                  Call
                 </a>
               )}
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-white border-white/30 hover:bg-white/10"
+              <button
+                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white border border-white/30 rounded-md hover:bg-white/10"
                 onClick={() => setStatusOpen(true)}
               >
                 Update Status
-              </Button>
+              </button>
               {role === 'admin' && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-white border-white/30 hover:bg-white/10"
+                <button
+                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white border border-white/30 rounded-md hover:bg-white/10"
                   onClick={() => setAdvisorOpen(true)}
                 >
                   {advisor ? 'Reassign' : 'Assign Advisor'}
-                </Button>
+                </button>
               )}
             </div>
           </div>
