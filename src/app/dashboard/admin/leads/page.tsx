@@ -125,7 +125,7 @@ export default async function AdminLeadsPage({
           <Link
             href={`/dashboard/admin/leads?view=${isPipeline ? 'table' : 'pipeline'}${searchParams.status ? '&status=' + searchParams.status : ''}`}
           >
-            <Button size="sm" variant="ghost" className="!bg-gray-500 !text-white !border-0 hover:!bg-gray-500 hover:!text-white">
+            <Button size="sm" variant="ghost" className="!bg-gray-500 !text-white !border">
               {isPipeline ? (
                 <><LayoutList className="mr-2 h-4 w-4" />Table View</>
               ) : (
