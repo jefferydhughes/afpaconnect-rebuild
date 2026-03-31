@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -13,6 +13,8 @@ import {
   Loader2,
   Sparkles,
   User2,
+  Brain,
+  AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -188,7 +190,49 @@ export default function CandidateInsightsPanel({
   )
   const [savingNotes, setSavingNotes] = useState(false)
 
+  // AI insights state
+  type AIInsights = {
+    archetype: string
+    motivations: string[]
+    decision_style: string
+    readiness_level: string
+    talking_points: string[]
+    concerns: string[]
+  }
+  const [aiInsights, setAiInsights] = useState<Record<string, AIInsights>>({})
+  const [aiLoading, setAiLoading] = useState(false)
+
   const selected = candidates.find((c) => c.id === selectedId) ?? null
+
+  // Fetch AI insights when candidate changes
+  useEffect(() => {
+    if (!selected || aiInsights[selected.id]) return
+    setAiLoading(true)
+    fetch('/api/advisor/insights', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        budget_range: selected.budget_range,
+        preferred_categories: selected.preferred_categories,
+        business_model_preference: selected.business_model_preference,
+        time_commitment: selected.time_commitment,
+        experience_level: selected.experience_level,
+        goals: selected.goals,
+        ai_profile_summary: selected.ai_profile_summary,
+        first_name: selected.first_name,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.archetype) {
+          setAiInsights((prev) => ({ ...prev, [selected.id]: data }))
+        }
+      })
+      .catch(() => {})
+      .finally(() => setAiLoading(false))
+  }, [selected?.id])
+
+  const currentInsights = selected ? aiInsights[selected.id] : null
 
   function selectCandidate(id: string) {
     setSelectedId(id)
@@ -319,9 +363,11 @@ export default function CandidateInsightsPanel({
                     : selected.email}
                 </h2>
                 <p className="text-gray-500 text-sm mt-0.5">
-                  {selected.experience_level
-                    ? EXPERIENCE_LABELS[selected.experience_level]
-                    : 'Quiz Candidate'}
+                  {currentInsights?.archetype
+                    ? currentInsights.archetype
+                    : selected.experience_level
+                      ? EXPERIENCE_LABELS[selected.experience_level]
+                      : 'Quiz Candidate'}
                 </p>
               </div>
               <div className="text-right text-sm text-gray-500 space-y-0.5 flex-shrink-0">
@@ -393,8 +439,25 @@ export default function CandidateInsightsPanel({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Key Motivations */}
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Key Motivations</h3>
-                  {selected.goals && selected.goals.length > 0 ? (
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-brand-navy" />
+                    Key Motivations
+                  </h3>
+                  {aiLoading ? (
+                    <div className="flex items-center gap-2 py-6 justify-center text-gray-400">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">Generating insights...</span>
+                    </div>
+                  ) : currentInsights?.motivations ? (
+                    <ul className="space-y-2.5">
+                      {currentInsights.motivations.map((m, i) => (
+                        <li key={i} className="flex items-start gap-2.5">
+                          <span className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                          <span className="text-sm text-gray-700 leading-snug">{m}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : selected.goals && selected.goals.length > 0 ? (
                     <ul className="space-y-2.5">
                       {selected.goals.map((goal, i) => (
                         <li key={i} className="flex items-start gap-2.5">
@@ -419,12 +482,15 @@ export default function CandidateInsightsPanel({
 
                 {/* Advisor Insights */}
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Advisor Insights</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                    <Brain className="h-4 w-4 text-purple-600" />
+                    Advisor Insights
+                  </h3>
                   <div className="bg-gray-50 rounded-lg p-4 border space-y-4">
                     <div className="grid grid-cols-5 gap-2 items-start">
                       <span className="col-span-2 text-sm text-gray-500">Decision Style</span>
-                      <span className="col-span-3 text-sm font-medium text-gray-800 leading-snug">
-                        {getDecisionStyle(selected)}
+                      <span className="col-span-3 text-sm font-semibold text-gray-800 leading-snug">
+                        {currentInsights?.decision_style || getDecisionStyle(selected)}
                       </span>
                     </div>
 
@@ -433,7 +499,7 @@ export default function CandidateInsightsPanel({
                       <span
                         className={`col-span-3 text-sm font-bold ${getReadiness(selected).color}`}
                       >
-                        {getReadiness(selected).label}
+                        {currentInsights?.readiness_level || getReadiness(selected).label}
                       </span>
                     </div>
 
@@ -472,6 +538,24 @@ export default function CandidateInsightsPanel({
                       </div>
                     )}
                   </div>
+
+                  {/* Potential Concerns */}
+                  {currentInsights?.concerns && currentInsights.concerns.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-amber-500" />
+                        Potential Concerns
+                      </h4>
+                      <div className="space-y-2">
+                        {currentInsights.concerns.map((c, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="mt-1.5 w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
+                            <span className="text-sm text-gray-600 leading-snug">{c}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -579,7 +663,7 @@ export default function CandidateInsightsPanel({
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  {buildCallPrepPoints(selected).map((point, i) => (
+                  {(currentInsights?.talking_points || buildCallPrepPoints(selected)).map((point, i) => (
                     <div
                       key={i}
                       className="flex items-start gap-3 p-4 rounded-lg border bg-white hover:border-brand-gold/50 transition-colors"
