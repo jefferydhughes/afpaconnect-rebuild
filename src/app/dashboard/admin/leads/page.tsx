@@ -92,12 +92,11 @@ export default async function AdminLeadsPage({
     )
   )
   const advisorNames = await getAdvisorNames(advisorIds)
-
   const enrichedLeads = leads.map((l) => ({
     ...l,
     advisor_name: l.attributed_advisor_id
       ? advisorNames[l.attributed_advisor_id] || null
-      : null,
+      : null
   }))
 
   // Stats (from full dataset before status filter)
@@ -126,7 +125,7 @@ export default async function AdminLeadsPage({
           <Link
             href={`/dashboard/admin/leads?view=${isPipeline ? 'table' : 'pipeline'}${searchParams.status ? '&status=' + searchParams.status : ''}`}
           >
-            <Button size="sm" className="!bg-white !text-gray-700 !border !border-gray-300">
+            <Button size="sm" style={{ background: '#fff', color: '#374151', border: '1px solid #d1d5db' }}>
               {isPipeline ? (
                 <><LayoutList className="mr-2 h-4 w-4" />Table View</>
               ) : (
@@ -134,7 +133,7 @@ export default async function AdminLeadsPage({
               )}
             </Button>
           </Link>
-          <Button size="sm" className="!bg-white !text-gray-700 !border !border-gray-300">
+          <Button size="sm" style={{ background: '#fff', color: '#374151', border: '1px solid #d1d5db' }}>
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </Button>
