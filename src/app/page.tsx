@@ -52,12 +52,12 @@ const stats = [
 ]
 
 const categories = [
-  { name: 'Food & Beverage', icon: '🍕' },
-  { name: 'Home Services', icon: '🏠' },
-  { name: 'Health & Wellness', icon: '💪' },
-  { name: 'Automotive', icon: '🚗' },
-  { name: 'Business Services', icon: '💼' },
-  { name: "Children's Education", icon: '🧒' },
+  { value: 'Food & Beverage', label: 'Food & Beverage', icon: '🍕' },
+  { value: 'Home Services', label: 'Home Services', icon: '🏠' },
+  { value: 'Health & Wellness', label: 'Health & Wellness', icon: '💪' },
+  { value: 'Automotive Services', label: 'Automotive', icon: '🚗' },
+  { value: 'Business Services', label: 'Business Services', icon: '💼' },
+  { value: "Children's Education", label: "Children's Education", icon: '🧒' },
 ]
 
 const successCards = [
@@ -294,11 +294,11 @@ export default async function HomePage() {
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => {
-              const count = categoryCounts[category.name] || 0
+              const count = categoryCounts[category.value] || 0
               return (
                 <Link
-                  key={category.name}
-                  href={`/directory?category=${encodeURIComponent(category.name)}`}
+                  key={category.value}
+                  href={`/directory?category=${encodeURIComponent(category.value)}`}
                   className="group"
                 >
                   <Card className="h-full transition-all hover:shadow-lg hover:border-brand-gold">
@@ -306,7 +306,7 @@ export default async function HomePage() {
                       <span className="text-4xl">{category.icon}</span>
                       <div>
                         <h3 className="font-semibold text-brand-navy group-hover:text-brand-gold transition-colors">
-                          {category.name}
+                          {category.label}
                         </h3>
                         <p className="text-sm text-gray-500">{count}+ franchises</p>
                       </div>
