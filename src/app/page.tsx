@@ -16,7 +16,10 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 import { FRANCHISE_CATEGORIES } from '@/lib/franchise-categories'
+import HeroSection from '@/components/home/HeroSection'
 
 const features = [
   {
