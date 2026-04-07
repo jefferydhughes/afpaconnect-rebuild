@@ -3,46 +3,66 @@ import { requireAdmin } from '@/lib/require-role'
 import {
   Search,
   Users,
-  Phone,
-  Mail,
-  MoreHorizontal,
   Filter,
-  Download
+  Download,
+  LayoutGrid,
+  LayoutList,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import type { Lead } from '@/types/database'
+import LeadActions from '@/components/leads/LeadActions'
+import PipelineView from '@/components/leads/PipelineView'
+import Link from 'next/link'
 
-type LeadWithProfile = Lead & {
-  profiles?: { full_name: string | null } | null
+type LeadWithAdvisor = Lead & {
+  advisor_name?: string | null
 }
 
-async function getLeads(status?: string) {
+async function getLeads(status?: string, search?: string) {
   const supabase = createAdminClient()
 
   let query = supabase
     .from('leads')
-    .select(`
-      *,
-      profiles:attributed_advisor_id (full_name)
-    `)
+    .select('*')
     .order('created_at', { ascending: false })
 
   if (status && status !== 'all') {
     query = query.eq('status', status)
   }
 
-  const { data } = await query.limit(100)
+  if (search) {
+    query = query.or(
+      `email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%`
+    )
+  }
 
-  return (data || []) as LeadWithProfile[]
+  const { data, error } = await query.limit(200)
+
+  if (error) {
+    console.error('Error fetching leads:', error)
+    return []
+  }
+
+  return (data || []) as LeadWithAdvisor[]
+}
+
+async function getAdvisorNames(advisorIds: string[]) {
+  if (advisorIds.length === 0) return {}
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, full_name, email')
+    .in('id', advisorIds)
+  return (data || []).reduce(
+    (acc, p) => {
+      acc[p.id] = p.full_name || p.email
+      return acc
+    },
+    {} as Record<string, string>
+  )
 }
 
 const statusColors: Record<string, { bg: string; text: string }> = {
@@ -57,71 +77,98 @@ const statusColors: Record<string, { bg: string; text: string }> = {
 export default async function AdminLeadsPage({
   searchParams,
 }: {
-  searchParams: { status?: string }
+  searchParams: { status?: string; search?: string; view?: string }
 }) {
   await requireAdmin('/dashboard/admin/leads')
 
-  const leads = await getLeads(searchParams.status)
+  const leads = await getLeads(searchParams.status, searchParams.search)
 
-  // Calculate stats
+  // Resolve advisor names
+  const advisorIds = Array.from(
+    new Set(
+      leads
+        .map((l) => l.attributed_advisor_id)
+        .filter(Boolean) as string[]
+    )
+  )
+  const advisorNames = await getAdvisorNames(advisorIds)
+  const enrichedLeads = leads.map((l) => ({
+    ...l,
+    advisor_name: l.attributed_advisor_id
+      ? advisorNames[l.attributed_advisor_id] || null
+      : null
+  }))
+
+  // Stats (from full dataset before status filter)
+  const allLeads = searchParams.status && searchParams.status !== 'all'
+    ? await getLeads()
+    : leads
   const stats = {
-    total: leads.length,
-    new: leads.filter((l: LeadWithProfile) => String(l.status) === 'new').length,
-    contacted: leads.filter((l: LeadWithProfile) => String(l.status) === 'contacted').length,
-    converted: leads.filter((l: LeadWithProfile) => String(l.status) === 'converted').length,
+    total: allLeads.length,
+    new: allLeads.filter((l) => String(l.status) === 'new').length,
+    contacted: allLeads.filter((l) => String(l.status) === 'contacted').length,
+    qualified: allLeads.filter((l) => String(l.status) === 'qualified').length,
+    converted: allLeads.filter((l) => String(l.status) === 'converted').length,
   }
+
+  const isPipeline = searchParams.view === 'pipeline'
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">All Leads</h1>
-          <p className="text-gray-600">{stats.total} total leads</p>
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Lead Pipeline</h1>
+        <div className="flex items-center gap-4 mt-1">
+          <span className="text-gray-600">{stats.total} total leads across all stages</span>
+          <span className="text-gray-300">|</span>
+          <Link
+            href={`/dashboard/admin/leads?view=${isPipeline ? 'table' : 'pipeline'}${searchParams.status ? '&status=' + searchParams.status : ''}`}
+            className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center"
+          >
+            {isPipeline ? (
+              <><LayoutList className="mr-1 h-3.5 w-3.5" />Table View</>
+            ) : (
+              <><LayoutGrid className="mr-1 h-3.5 w-3.5" />Pipeline View</>
+            )}
+          </Link>
+          <span className="text-gray-300">|</span>
+          <span className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center cursor-pointer">
+            <Download className="mr-1 h-3.5 w-3.5" />
+            Export CSV
+          </span>
         </div>
-        <Button variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            <p className="text-sm text-gray-500">Total Leads</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-blue-600">{stats.new}</p>
-            <p className="text-sm text-gray-500">New</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-yellow-600">{stats.contacted}</p>
-            <p className="text-sm text-gray-500">Contacted</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-2xl font-bold text-green-600">{stats.converted}</p>
-            <p className="text-sm text-gray-500">Converted</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        {[
+          { label: 'Total', value: stats.total, color: 'text-gray-900', bg: 'bg-white' },
+          { label: 'New', value: stats.new, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'Contacted', value: stats.contacted, color: 'text-yellow-600', bg: 'bg-yellow-50' },
+          { label: 'Qualified', value: stats.qualified, color: 'text-purple-600', bg: 'bg-purple-50' },
+          { label: 'Converted', value: stats.converted, color: 'text-green-600', bg: 'bg-green-50' },
+        ].map((s) => (
+          <Card key={s.label} className={s.bg}>
+            <CardContent className="p-4">
+              <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+              <p className="text-sm text-gray-500">{s.label}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Filters */}
       <Card className="mb-6">
         <CardContent className="p-4">
           <form className="flex flex-wrap gap-4">
+            <input type="hidden" name="view" value={searchParams.view || 'table'} />
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 name="search"
-                placeholder="Search leads..."
+                placeholder="Search by name or email..."
                 className="pl-10"
+                defaultValue={searchParams.search || ''}
               />
             </div>
             <select
@@ -137,134 +184,121 @@ export default async function AdminLeadsPage({
               <option value="converted">Converted</option>
               <option value="unqualified">Unqualified</option>
             </select>
-            <Button type="submit">
-              <Filter className="mr-2 h-4 w-4" />
+            <button type="submit" className="h-10 px-4 text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
+              <Filter className="mr-1.5 h-3.5 w-3.5" />
               Apply
-            </Button>
+            </button>
           </form>
         </CardContent>
       </Card>
 
-      {/* Leads Table */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
-                    Lead
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
-                    Source
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
-                    Budget
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
-                    Advisor
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
-                    Status
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
-                    Date
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {leads.map((lead: LeadWithProfile) => (
-                  <tr key={lead.id} className="hover:bg-gray-50">
-                    <td className="py-3 px-4">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {lead.first_name && lead.last_name
-                            ? `${lead.first_name} ${lead.last_name}`
-                            : lead.email}
-                        </p>
-                        <p className="text-sm text-gray-500">{lead.email}</p>
-                        {lead.phone && (
-                          <p className="text-sm text-gray-500">{lead.phone}</p>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge variant="outline" className="capitalize">
-                        {lead.source?.replace(/_/g, ' ')}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-sm">
-                      {lead.budget_range ? (
-                        <span className="capitalize">{lead.budget_range.replace(/_/g, ' ')}</span>
-                      ) : (
-                        <span className="text-gray-400">Not specified</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-sm">
-                      {lead.profiles?.full_name || (
-                        <span className="text-gray-400">Unassigned</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge
-                        className={`${statusColors[String(lead.status)]?.bg || 'bg-gray-100'} ${statusColors[String(lead.status)]?.text || 'text-gray-700'} border-0 capitalize`}
-                      >
-                        {lead.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-500">
-                      {new Date(lead.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex gap-1">
-                        {lead.email && (
-                          <a href={`mailto:${lead.email}`}>
-                            <Button size="sm" variant="ghost">
-                              <Mail className="h-4 w-4" />
-                            </Button>
-                          </a>
-                        )}
-                        {lead.phone && (
-                          <a href={`tel:${lead.phone}`}>
-                            <Button size="sm" variant="ghost">
-                              <Phone className="h-4 w-4" />
-                            </Button>
-                          </a>
-                        )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
-                            <DropdownMenuItem>Update Status</DropdownMenuItem>
-                            <DropdownMenuItem>Assign Advisor</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </td>
+      {/* Pipeline or Table View */}
+      {isPipeline ? (
+        <PipelineView leads={enrichedLeads} />
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Lead</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Source</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Budget</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Advisor</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {leads.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="font-semibold text-gray-900 mb-2">No leads found</h3>
-              <p className="text-gray-500">
-                Leads will appear here when users complete the quiz
-              </p>
+                </thead>
+                <tbody className="divide-y">
+                  {enrichedLeads.map((lead) => {
+                    const name =
+                      lead.first_name && lead.last_name
+                        ? `${lead.first_name} ${lead.last_name}`
+                        : lead.email
+                    return (
+                      <tr key={lead.id} className="hover:bg-gray-50">
+                        <td className="py-3 px-4">
+                          <Link
+                            href={`/dashboard/admin/leads/${lead.id}`}
+                            className="block group"
+                          >
+                            <p className="font-medium text-gray-900 group-hover:text-brand-navy">
+                              {name}
+                            </p>
+                            <p className="text-sm text-gray-500">{lead.email}</p>
+                            {lead.phone && (
+                              <p className="text-sm text-gray-400">{lead.phone}</p>
+                            )}
+                          </Link>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline" className="capitalize">
+                            {lead.source?.replace(/_/g, ' ') || 'Unknown'}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-sm">
+                          {lead.budget_range ? (
+                            <span className="capitalize">
+                              {lead.budget_range.replace(/_/g, ' ')}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">Not specified</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-sm">
+                          {lead.advisor_name ? (
+                            <span className="text-brand-navy font-medium">
+                              {lead.advisor_name}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">Unassigned</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge
+                            className={`${
+                              statusColors[String(lead.status)]?.bg || 'bg-gray-100'
+                            } ${
+                              statusColors[String(lead.status)]?.text || 'text-gray-700'
+                            } border-0 capitalize`}
+                          >
+                            {lead.status}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-500">
+                          {new Date(lead.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4">
+                          <LeadActions
+                            leadId={lead.id}
+                            leadName={name}
+                            email={lead.email}
+                            phone={lead.phone}
+                            status={String(lead.status)}
+                            advisorId={lead.attributed_advisor_id}
+                          />
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
-          )}
-        </CardContent>
-      </Card>
+
+            {enrichedLeads.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="font-semibold text-gray-900 mb-2">No leads found</h3>
+                <p className="text-gray-500">
+                  Leads will appear here when users complete the quiz
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

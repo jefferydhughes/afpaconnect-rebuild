@@ -79,17 +79,14 @@ export async function POST(request: Request) {
       first_name: name.split(' ')[0] || name,
       last_name: name.split(' ').slice(1).join(' ') || '',
       phone: phone || null,
-      source: 'franchise_inquiry',
+      source: 'directory_inquiry',
       message: message,
       status: 'new',
     })
 
     if (dbError) {
       console.error('Lead insert error:', dbError)
-      return NextResponse.json(
-        { error: 'Failed to save inquiry' },
-        { status: 500 }
-      )
+      // Log but don't block — still attempt to send email
     }
 
     const siteUrl = getSiteUrl()
@@ -126,10 +123,8 @@ export async function POST(request: Request) {
     })
 
     if (inquiryResult.error) {
-      return NextResponse.json(
-        { error: 'Failed to send email' },
-        { status: 500 }
-      )
+      console.error('Failed to send inquiry email:', inquiryResult.error)
+      // Don't fail the request — lead is already saved
     }
 
     // 3. Send thank-you email to the person who submitted
