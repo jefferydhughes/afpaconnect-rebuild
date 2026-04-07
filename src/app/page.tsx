@@ -16,9 +16,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
-import HeroSection from '@/components/home/HeroSection'
+import { FRANCHISE_CATEGORIES } from '@/lib/franchise-categories'
 
 const features = [
   {
@@ -51,12 +49,12 @@ const stats = [
 ]
 
 const categories = [
-  { name: 'Food & Beverage', icon: '🍕', count: 120 },
-  { name: 'Home Services', icon: '🏠', count: 85 },
-  { name: 'Health & Fitness', icon: '💪', count: 65 },
-  { name: 'Automotive', icon: '🚗', count: 45 },
-  { name: 'Business Services', icon: '💼', count: 90 },
-  { name: "Children's Services", icon: '🧒', count: 55 },
+  { name: 'Food & Beverage', icon: '🍕' },
+  { name: 'Home Services', icon: '🏠' },
+  { name: 'Health & Wellness', icon: '💪' },
+  { name: 'Automotive', icon: '🚗' },
+  { name: 'Business Services', icon: '💼' },
+  { name: "Children's Education", icon: '🧒' },
 ]
 
 const successCards = [
@@ -88,6 +86,7 @@ export default async function HomePage() {
   let displayName: string | null = null
   let hasSavedMatches = false
   let matchesHref = '/quiz'
+  let categoryCounts: Record<string, number> = {}
 
   try {
     const supabase = createClient()
@@ -113,6 +112,8 @@ export default async function HomePage() {
       .eq('is_active', true)
       .limit(6)
     featuredFranchises = featuredResult.data
+
+    categoryCounts = await getCategoryCounts(supabase)
   } catch (error) {
     console.error('HomePage: failed to load Supabase-driven sections. Rendering fallback.', error)
   }
@@ -289,26 +290,29 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((category) => (
-              <Link
-                key={category.name}
-                href={`/directory?category=${encodeURIComponent(category.name.toLowerCase().replace(/ & /g, '_').replace(/ /g, '_'))}`}
-                className="group"
-              >
-                <Card className="h-full transition-all hover:shadow-lg hover:border-brand-gold">
-                  <CardContent className="flex items-center gap-4 p-6">
-                    <span className="text-4xl">{category.icon}</span>
-                    <div>
-                      <h3 className="font-semibold text-brand-navy group-hover:text-brand-gold transition-colors">
-                        {category.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">{category.count}+ franchises</p>
-                    </div>
-                    <ArrowRight className="ml-auto h-5 w-5 text-gray-400 group-hover:text-brand-gold transition-colors" />
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+            {categories.map((category) => {
+              const count = categoryCounts[category.name] || 0
+              return (
+                <Link
+                  key={category.name}
+                  href={`/directory?category=${encodeURIComponent(category.name)}`}
+                  className="group"
+                >
+                  <Card className="h-full transition-all hover:shadow-lg hover:border-brand-gold">
+                    <CardContent className="flex items-center gap-4 p-6">
+                      <span className="text-4xl">{category.icon}</span>
+                      <div>
+                        <h3 className="font-semibold text-brand-navy group-hover:text-brand-gold transition-colors">
+                          {category.name}
+                        </h3>
+                        <p className="text-sm text-gray-500">{count}+ franchises</p>
+                      </div>
+                      <ArrowRight className="ml-auto h-5 w-5 text-gray-400 group-hover:text-brand-gold transition-colors" />
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
           </div>
 
           <div className="mt-8 text-center">
@@ -428,4 +432,30 @@ async function getQuizDisplayName(supabase: any, id: string): Promise<string | n
   if (!fallback.error && fallback.data?.first_name) return fallback.data.first_name
 
   return null
+}
+
+async function getCategoryCounts(supabase: any): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from('franchise')
+    .select('category')
+    .eq('is_active', true)
+
+  if (error) {
+    console.error('Error fetching category counts:', error)
+    return {}
+  }
+
+  const counts: Record<string, number> = {}
+  data?.forEach((franchise: any) => {
+    const category = franchise.category
+    if (category) {
+      // Use the primary category value for counting
+      const primaryCategory = FRANCHISE_CATEGORIES.find(cat => 
+        cat.value === category || cat.aliases?.includes(category)
+      )?.value || category
+      counts[primaryCategory] = (counts[primaryCategory] || 0) + 1
+    }
+  })
+
+  return counts
 }
