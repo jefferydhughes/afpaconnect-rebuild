@@ -12,6 +12,7 @@ const footerLinks = {
     { name: 'Blog', href: '/blog' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Become an Advisor', href: '/become-advisor' },
+    { name: 'List Your Franchise', href: '/franchisor-signup' },
   ],
   company: [
     { name: 'About Us', href: '/about' },

@@ -26,6 +26,7 @@ const navigation = [
       { name: 'FAQ', href: '/faq' },
       { name: 'Investment Calculator', href: '/calculator' },
       { name: 'Become an Advisor', href: '/become-advisor' },
+      { name: 'List Your Franchise', href: '/franchisor-signup' },
       { name: 'FranchiseFit360™ Assessment', href: '/fit360' },
     ],
   },
