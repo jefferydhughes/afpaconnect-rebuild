@@ -11,6 +11,8 @@ import {
 import { Button } from '@/components/ui/button'
 import CalendarEmbed from '@/app/advisorpage/CalendarEmbed'
 import AdvisorCookieSetter from '@/components/advisor/AdvisorCookieSetter'
+import AdvisorContactForm from '@/components/advisor/AdvisorContactForm'
+import AdvisorCallButton from '@/components/advisor/AdvisorCallButton'
 
 function toSlug(name: string | null): string {
   return (name ?? '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
@@ -148,15 +150,20 @@ export default async function AdvisorProfilePage({
               </div>
 
               {/* CTA buttons in hero */}
-              {advisor.calendar_embed_code && (
-                <div className="mt-5">
+              <div className="mt-5 flex flex-wrap items-center justify-center md:justify-start gap-3">
+                {advisor.calendar_embed_code && (
                   <a href="#calendar">
                     <Button className="bg-brand-gold text-brand-navy hover:bg-brand-gold-light font-semibold px-6">
-                      Schedule a Free Consultation
+                      Schedule a Call
                     </Button>
                   </a>
-                </div>
-              )}
+                )}
+                <AdvisorContactForm
+                  advisorId={advisor.id}
+                  advisorName={advisor.name ?? 'this advisor'}
+                />
+                {advisor.phone && <AdvisorCallButton phone={advisor.phone} />}
+              </div>
             </div>
           </div>
         </div>
@@ -271,7 +278,7 @@ export default async function AdvisorProfilePage({
             <Link href={advisor.created_by ? `/quiz?advisor=${advisor.created_by}` : '/quiz'}>
               <Button
                 size="lg"
-                className="bg-brand-gold text-brand-navy hover:bg-brand-gold-light font-semibold px-8"
+                className="bg-brand-gold text-slate-700 hover:bg-brand-gold font-semibold px-8"
               >
                 Take the Free Quiz
               </Button>
@@ -281,7 +288,7 @@ export default async function AdvisorProfilePage({
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white text-white hover:bg-white/10 px-8"
+                  className="border-white text-slate-700 bg-white hover:bg-white hover:text-slate-700 px-8"
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Connect on LinkedIn

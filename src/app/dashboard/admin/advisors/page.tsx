@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import DeleteAdvisorButton from '@/components/admin/DeleteAdvisorButton'
+import BackfillAdvisorUsersButton from '@/components/admin/BackfillAdvisorUsersButton'
 import type { Advisor } from '@/types/database'
 
 async function getAdvisors(search?: string, page = 1) {
@@ -48,12 +49,15 @@ export default async function AdminAdvisorsPage({
           <h1 className="text-2xl font-bold text-gray-900">Manage Advisors</h1>
           <p className="text-gray-500 text-sm">{total} advisor{total !== 1 ? 's' : ''}</p>
         </div>
-        <Link href="/dashboard/admin/advisors/new">
-          <Button className="bg-brand-navy text-brand-gold hover:bg-brand-navy-light">
-            <Plus className="mr-2 h-4 w-4" />
-            Add New Advisor
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <BackfillAdvisorUsersButton />
+          <Link href="/dashboard/admin/advisors/new">
+            <Button className="bg-brand-navy text-brand-gold hover:bg-brand-navy-light">
+              <Plus className="mr-2 h-4 w-4" />
+              Add New Advisor
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Search */}

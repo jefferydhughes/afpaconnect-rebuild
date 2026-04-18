@@ -31,6 +31,65 @@ const advisorPayloadSchema = z.object({
   longitude: z.number().min(-180).max(180).optional().nullable(),
 }).strict()
 
+/**
+ * Ensures there is a Supabase auth user + profile for this advisor email.
+ * Returns the auth user id. If one already exists, it's reused (and its
+ * profile is upgraded to role='advisor' if needed). If not, a new user is
+ * invited so they can set their own password.
+ */
+async function ensureAdvisorUser(
+  adminClient: ReturnType<typeof createAdminClient>,
+  email: string,
+  fullName: string | null
+): Promise<{ userId: string; invited: boolean } | { error: string }> {
+  const normalizedEmail = email.toLowerCase()
+
+  // 1) Does a profile already exist with this email?
+  const { data: existingProfile } = await adminClient
+    .from('profiles')
+    .select('id, role')
+    .eq('email', normalizedEmail)
+    .maybeSingle()
+
+  if (existingProfile?.id) {
+    if (existingProfile.role !== 'admin' && existingProfile.role !== 'advisor') {
+      const profilesTable = adminClient.from('profiles') as any
+      await profilesTable
+        .update({ role: 'advisor', full_name: fullName ?? undefined })
+        .eq('id', existingProfile.id)
+    }
+    return { userId: existingProfile.id, invited: false }
+  }
+
+  // 2) No profile — invite via Supabase Auth. The DB trigger creates a profile.
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
+  const redirectTo = `${siteUrl.replace(/\/+$/, '')}/reset-password`
+
+  const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
+    normalizedEmail,
+    {
+      data: fullName ? { full_name: fullName } : undefined,
+      redirectTo,
+    }
+  )
+
+  if (inviteError || !invited?.user?.id) {
+    return { error: inviteError?.message || 'Failed to invite advisor user' }
+  }
+
+  // Promote their profile to advisor role
+  const profilesTable = adminClient.from('profiles') as any
+  await profilesTable
+    .update({ role: 'advisor', full_name: fullName ?? undefined })
+    .eq('id', invited.user.id)
+
+  return { userId: invited.user.id, invited: true }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Verify caller is admin
@@ -60,17 +119,28 @@ export async function POST(request: NextRequest) {
       )
     }
     const payload = parsedBody.data
+    const normalizedEmail = payload.email.toLowerCase()
 
     const adminClient = createAdminClient()
+
+    // Ensure an auth user / profile exists for this advisor
+    const userResult = await ensureAdvisorUser(
+      adminClient,
+      normalizedEmail,
+      payload.name ?? null
+    )
+    if ('error' in userResult) {
+      return NextResponse.json({ error: userResult.error }, { status: 400 })
+    }
 
     // Insert into the advisor table
     const advisorTable = adminClient.from('advisor') as any
     const { data: advisorData, error: insertError } = await advisorTable
       .insert({
         ...payload,
-        email: payload.email.toLowerCase(),
+        email: normalizedEmail,
         name: payload.name || null,
-        created_by: user.id,
+        created_by: userResult.userId,
       })
       .select('id')
       .single()
@@ -85,7 +155,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Advisor creation failed' }, { status: 500 })
     }
 
-    return NextResponse.json({ id: advisor.id, success: true })
+    return NextResponse.json({
+      id: advisor.id,
+      userId: userResult.userId,
+      invited: userResult.invited,
+      success: true,
+    })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 })
   }

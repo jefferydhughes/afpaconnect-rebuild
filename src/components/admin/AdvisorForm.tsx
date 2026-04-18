@@ -205,9 +205,18 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
       }
 
       if (isNew) {
-        const { error } = await supabase.from('advisor').insert(payload)
-        if (error) throw error
-        toast.success('Advisor created!')
+        const res = await fetch('/api/admin/create-advisor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        const result = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(result.error || 'Failed to create advisor')
+        toast.success(
+          result.invited
+            ? 'Advisor created! An invitation email has been sent so they can set a password.'
+            : 'Advisor created and linked to their existing user account!'
+        )
       } else {
         const { error } = await supabase
           .from('advisor')
@@ -227,6 +236,14 @@ export default function AdvisorForm({ advisor }: { advisor?: any }) {
 
   return (
     <div className="max-w-4xl mx-auto">
+      {isNew && (
+        <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+          <strong>Heads up:</strong> creating an advisor also creates a user account
+          in Supabase using the email below. An invitation email is sent so the
+          advisor can set their own password and log in.
+        </div>
+      )}
+
       {/* Tab bar */}
       <div className="flex border-b mb-6">
         {TABS.map(t => (
