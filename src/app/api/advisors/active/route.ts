@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 
+// Admin client uses `cache: 'no-store'`, which makes this fetch dynamic.
+// Tell Next.js not to try to statically prerender this route.
+export const dynamic = 'force-dynamic'
+
 // GET /api/advisors/active — list all advisors (uses admin client to bypass RLS)
 export async function GET() {
   try {
