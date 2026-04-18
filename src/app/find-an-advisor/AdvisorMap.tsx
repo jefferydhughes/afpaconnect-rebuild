@@ -24,6 +24,7 @@ import {
   Users,
   Loader2,
 } from 'lucide-react'
+import AdvisorContactForm from '@/components/advisor/AdvisorContactForm'
 
 // Dynamically import the map to avoid SSR issues with Leaflet
 const MapWithNoSSR = dynamic(() => import('./LeafletMap'), {
@@ -255,12 +256,18 @@ export default function AdvisorMap({ advisors }: AdvisorMapProps) {
                           </Button>
                         </Link>
                       ) : advisor.email ? (
-                        <a href={`mailto:${advisor.email}`} className="flex-1">
-                          <Button size="sm" variant="outline" className="w-full">
-                            <Mail className="w-4 h-4 mr-1" />
-                            Contact
-                          </Button>
-                        </a>
+                        <div className="flex-1">
+                          <AdvisorContactForm
+                            advisorId={advisor.id}
+                            advisorName={advisor.name ?? 'this advisor'}
+                            trigger={
+                              <Button size="sm" variant="outline" className="w-full">
+                                <Mail className="w-4 h-4 mr-1" />
+                                Contact
+                              </Button>
+                            }
+                          />
+                        </div>
                       ) : null}
                       {advisor.phone && (
                         <a href={`tel:${advisor.phone}`}>

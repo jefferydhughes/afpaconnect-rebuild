@@ -23,9 +23,15 @@ const US_STATES = [
 interface Props {
   advisorId: string
   advisorName: string
+  /**
+   * Optional custom trigger element. Must be a single React element that can
+   * accept a ref (Radix `asChild` requirement). If omitted, the default
+   * hero-style "Send Message" button is rendered.
+   */
+  trigger?: React.ReactElement
 }
 
-export default function AdvisorContactForm({ advisorId, advisorName }: Props) {
+export default function AdvisorContactForm({ advisorId, advisorName, trigger }: Props) {
   const [open, setOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -85,10 +91,12 @@ export default function AdvisorContactForm({ advisorId, advisorName }: Props) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="bg-white text-brand-navy hover:bg-slate-100 font-semibold px-6">
-          <Mail className="w-4 h-4 mr-2" />
-          Send Message
-        </Button>
+        {trigger ?? (
+          <Button className="bg-white text-brand-navy hover:bg-slate-100 font-semibold px-6">
+            <Mail className="w-4 h-4 mr-2" />
+            Send Message
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
